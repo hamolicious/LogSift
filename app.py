@@ -193,38 +193,50 @@ class LoggerApp(App):
                     max_lines=self.MAX_DISPLAY_LOGS,
                     id="logger",
                 )
-                yield Input(id="filter")
+                yield Input(
+                    placeholder="Filter",
+                    id="filter",
+                    tooltip="Filter logs\n- terms are separated by space\n- use '!' to invert terms",
+                )
 
             with Container(id="settings-container"):
                 with Center():
                     yield Label("Filtering")
                 yield Rule()
 
-                yield Label("Filter Settings")
+                yield Label("Ingestion Settings")
 
                 yield RadioButton(
                     "Ingest logs",
                     value=True,
                     id=Ids.INGEST_LOGS_TOGGLE,
                     classes="settings-radio-button",
+                    tooltip="Toggle ingestion of logs, while off, the app still buffers incoming logs and will flush that buffer once re-enabled.",
+                )
+
+                yield Spacer()
+                yield Label("Filter Settings")
+
+                yield RadioButton(
+                    "Filter Active",
+                    value=True,
+                    id=Ids.FILTER_TOGGLE,
+                    classes="settings-radio-button",
+                    tooltip="Toggle enforcing filter",
                 )
                 yield RadioButton(
                     "Match All",
                     value=False,
                     id=Ids.MATCH_ALL,
                     classes="settings-radio-button",
+                    tooltip="Matches either all or at least 1 term from filter",
                 )
                 yield RadioButton(
-                    "Filter",
-                    value=True,
-                    id=Ids.FILTER_TOGGLE,
-                    classes="settings-radio-button",
-                )
-                yield RadioButton(
-                    "Case sensitive",
+                    "Case insensitive",
                     value=True,
                     id=Ids.CASE_INSENSITIVE_TOGGLE,
                     classes="settings-radio-button",
+                    tooltip="Toggle case sensitivity/insensitivity",
                 )
 
                 yield Spacer()
@@ -236,11 +248,13 @@ class LoggerApp(App):
                         value=True,
                         id=Ids.FILTER_OMIT,
                         classes="full-width",
+                        tooltip="Omit non-matching logs",
                     )
                     yield RadioButton(
                         "Highlight",
                         id=Ids.FILTER_HIGHLIGHT,
                         classes="full-width",
+                        tooltip="Highlight matching logs",
                     )
 
 
