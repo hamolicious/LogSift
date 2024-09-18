@@ -1,6 +1,22 @@
 import os
+import time
 import sys
 import threading
+
+
+class Environment:
+    terminal_width: int
+    terminal_height: int
+
+
+class ThreadLiveness:
+    display_thread: float = time.time()
+
+    @classmethod
+    def check_threads(cls) -> None:
+        curr_time = time.time()
+        if curr_time > cls.display_thread + 5:
+            print("Display thread is not responding")
 
 
 class Logs:
@@ -26,10 +42,12 @@ class Logs:
             return len(cls._logs)
 
 
-def log_display_thread() -> None:
+def display_thread_worker() -> None:
     last_len = Logs.get_len()
 
     while True:
+        ThreadLiveness.display_thread = time.time()
+
         if last_len == Logs.get_len():
             continue
 
@@ -64,7 +82,11 @@ def display_logs(logs: list[str], screen_buffer_len: int = 50) -> None:
                 print(f"\t+{counter} identical")
             counter = 0
 
-        print(log, end="")
+        nl = ""
+        if log.endswith("\n") and len(log) > Environment.terminal_width:
+            nl = "\n"
+
+        print(log[: Environment.terminal_width :], end=nl)
 
         last_log = log
 
@@ -75,17 +97,26 @@ def display_status(logs: list[str]) -> None:
 
 
 def start_display_thread() -> None:
-    display_thread = threading.Thread(target=log_display_thread)
+    display_thread = threading.Thread(target=display_thread_worker)
     display_thread.daemon = True
     display_thread.start()
+
+
+def update_environment() -> None:
+    Environment.terminal_width = os.get_terminal_size().columns
+    Environment.terminal_height = os.get_terminal_size().lines
 
 
 def main() -> None:
     start_display_thread()
 
     while True:
+        update_environment()
+
         log_line = get_log_line()
         Logs.add_entry(log_line)
+
+        ThreadLiveness.check_threads()
 
 
 if __name__ == "__main__":
