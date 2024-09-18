@@ -1,15 +1,34 @@
 import os
 import time
+import datetime
 import sys
 import threading
 
 
-class Environment:
+class Log:
+    def __init__(self, text: str) -> None:
+        self._text = text
+        self._time = time.time()
+
+    def __str__(self) -> str:
+        t = datetime.datetime.fromtimestamp(self._time).strftime("%H:%M:%S.%f")[:-3]
+        return f"[ {t} ] {self._text}"
+
+    @property
+    def text(self) -> str:
+        return self._text
+
+    @property
+    def time(self) -> float:
+        return self._time
+
+
+class EnvironmentManager:
     terminal_width: int
     terminal_height: int
 
 
-class ThreadLiveness:
+class ThreadHealthManager:
     display_thread: float = time.time()
 
     @classmethod
@@ -19,17 +38,17 @@ class ThreadLiveness:
             print("Display thread is not responding")
 
 
-class Logs:
-    _logs: list[str] = []
+class LogsManager:
+    _logs: list[Log] = []
     _lock = threading.Lock()
 
     @classmethod
-    def get_logs(cls) -> list[str]:
+    def get_logs(cls) -> list[Log]:
         with cls._lock:
             return cls._logs[::]
 
     @classmethod
-    def add_entry(cls, log: str | None) -> None:
+    def add_entry(cls, log: Log | None) -> None:
         if log is None:
             return
 
@@ -43,38 +62,38 @@ class Logs:
 
 
 def display_thread_worker() -> None:
-    last_len = Logs.get_len()
+    last_len = LogsManager.get_len()
 
     while True:
-        ThreadLiveness.display_thread = time.time()
+        ThreadHealthManager.display_thread = time.time()
 
-        if last_len == Logs.get_len():
+        if last_len == LogsManager.get_len():
             continue
 
         clear_display()
-        display_logs(Logs.get_logs())
-        display_status(Logs.get_logs())
+        display_logs(LogsManager.get_logs())
+        display_status(LogsManager.get_logs())
 
-        last_len = Logs.get_len()
+        last_len = LogsManager.get_len()
 
 
-def get_log_line() -> str | None:
+def get_log_line() -> Log | None:
     raw_line = sys.stdin.readline()
     log_line = raw_line
 
-    return log_line
+    return Log(log_line)
 
 
 def clear_display() -> None:
     os.system("clear")
 
 
-def display_logs(logs: list[str], screen_buffer_len: int = 50) -> None:
+def display_logs(logs: list[Log], screen_buffer_len: int = 50) -> None:
     last_log: str = ""
     counter = 0
 
     for log in logs[-screen_buffer_len::]:
-        if log == last_log and log.strip().lower() not in ["\n", "", "\t"]:
+        if log.text == last_log and log.text.strip().lower() not in ["\n", "", "\t"]:
             counter += 1
             continue
         else:
@@ -83,15 +102,18 @@ def display_logs(logs: list[str], screen_buffer_len: int = 50) -> None:
             counter = 0
 
         nl = ""
-        if log.endswith("\n") and len(log) > Environment.terminal_width:
+        if (
+            log.text.endswith("\n")
+            and len(log.text) > EnvironmentManager.terminal_width
+        ):
             nl = "\n"
 
-        print(log[: Environment.terminal_width :], end=nl)
+        print(str(log)[: EnvironmentManager.terminal_width :], end=nl)
 
-        last_log = log
+        last_log = log.text
 
 
-def display_status(logs: list[str]) -> None:
+def display_status(logs: list[Log]) -> None:
     print()
     print(f"-= Supalogger captured {len(logs)} logs =-")
 
@@ -103,8 +125,8 @@ def start_display_thread() -> None:
 
 
 def update_environment() -> None:
-    Environment.terminal_width = os.get_terminal_size().columns
-    Environment.terminal_height = os.get_terminal_size().lines
+    EnvironmentManager.terminal_width = os.get_terminal_size().columns
+    EnvironmentManager.terminal_height = os.get_terminal_size().lines
 
 
 def main() -> None:
@@ -114,9 +136,9 @@ def main() -> None:
         update_environment()
 
         log_line = get_log_line()
-        Logs.add_entry(log_line)
+        LogsManager.add_entry(log_line)
 
-        ThreadLiveness.check_threads()
+        ThreadHealthManager.check_threads()
 
 
 if __name__ == "__main__":
