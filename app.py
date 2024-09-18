@@ -171,6 +171,9 @@ class LoggerApp(App):
             case Ids.FILTER_OMIT:
                 self.filter_mode = id_
 
+            case Ids.MATCH_ALL:
+                self.filter_manager.set_match_all(value)
+
             case _:
                 raise ValueError(f"No case for {id_}")
 
@@ -203,6 +206,12 @@ class LoggerApp(App):
                     "Ingest logs",
                     value=True,
                     id=Ids.INGEST_LOGS_TOGGLE,
+                    classes="settings-radio-button",
+                )
+                yield RadioButton(
+                    "Match All",
+                    value=False,
+                    id=Ids.MATCH_ALL,
                     classes="settings-radio-button",
                 )
                 yield RadioButton(

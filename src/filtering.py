@@ -4,6 +4,7 @@ class FilterManager:
 
         self._filter_active: bool = True
         self._case_insensitive: bool = True
+        self._match_all: bool = False
 
     @property
     def is_disabled(self) -> bool:
@@ -15,6 +16,13 @@ class FilterManager:
 
     def set_filter(self, filter_: str) -> None:
         self._filter = filter_
+
+    @property
+    def match_all(self):
+        return self._match_all
+
+    def set_match_all(self, value: bool) -> None:
+        self._match_all = value
 
     @property
     def filter_active(self) -> bool:
@@ -36,11 +44,26 @@ class FilterManager:
             raise ValueError("Case insensitive must be a boolean")
         self._case_insensitive = value
 
+    def handle_case(self, value: str) -> str:
+        return value.lower() if self.case_insensitive else value
+
     def match(self, log_line: str) -> bool:
         if self.is_disabled:
             return True
 
-        if self.case_insensitive:
-            return self.filter.lower() in log_line.lower()
+        terms = filter(
+            lambda term: term != "", self.handle_case(self.filter).split(" ")
+        )
 
-        return self.filter in log_line
+        def _match_term(term: str) -> bool:
+            inverted = term.startswith("!")
+            matcher = term[1::] if inverted else term
+
+            value = matcher in self.handle_case(log_line)
+
+            return (not value) if inverted else value
+
+        if self.match_all:
+            return all(map(_match_term, terms))
+
+        return any(map(_match_term, terms))

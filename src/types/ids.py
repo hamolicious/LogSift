@@ -5,3 +5,5 @@ class Ids:
 
     FILTER_HIGHLIGHT = "filter-highlight-toggle"
     FILTER_OMIT = "filter-omit-toggle"
+
+    MATCH_ALL = "match-all-toggle"
