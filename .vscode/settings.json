@@ -1,5 +1,5 @@
 {
-    "autoHide.autoHideSideBar": false,
+    "autoHide.autoHideSideBar": true,
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#df1376",
         "activityBar.background": "#df1376",
