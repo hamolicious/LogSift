@@ -65,18 +65,39 @@ class LoggerApp(App):
         logger.clear()
 
     def filter_and_refresh_logs(self) -> None:
+        self.filter_using_highlight()
+        self.refresh_logger()
+
+    def filter_using_omit(self) -> None:
         self.filtered_logs = list(
             filter(
                 lambda log: self.filter_manager.match(log.text),
                 self.all_ingested_logs,
             )
         )
-        self.refresh_logger()
+
+    def filter_using_highlight(self) -> None:
+        logs: list[Log] = []
+        for log in self.all_ingested_logs:
+            logs.append(log)
+
+            if (
+                self.filter_manager.match(log.text)
+                and not self.filter_manager.is_disabled
+            ):
+                log.set_prefix("[on #006000]")
+                log.set_suffix("[/on #006000]")
+                continue
+
+            log.set_prefix("")
+            log.set_suffix("")
+
+        self.filtered_logs = logs
 
     def refresh_logger(self) -> None:
         self.clear_logger()
         for log in self.filtered_logs:
-            self.add_to_logger(log.text)
+            self.add_to_logger(str(log))
 
     @work(thread=True)
     def start_updating_logs(self) -> None:

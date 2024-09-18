@@ -6,6 +6,10 @@ class FilterManager:
         self._case_insensitive: bool = True
 
     @property
+    def is_disabled(self) -> bool:
+        return not self._filter_active or self.filter == ""
+
+    @property
     def filter(self):
         return self._filter
 
@@ -33,7 +37,7 @@ class FilterManager:
         self._case_insensitive = value
 
     def match(self, log_line: str) -> bool:
-        if self.filter == "" or not self.filter_active:
+        if self.is_disabled:
             return True
 
         if self.case_insensitive:
