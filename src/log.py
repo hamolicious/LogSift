@@ -32,6 +32,12 @@ class Log:
     def suffix(self) -> str:
         return self._suffix
 
+    def copy(self):
+        copied_log = type(self)(self._text)
+        copied_log._time = self._time
+
+        return copied_log
+
     def __str__(self) -> str:
         t = datetime.datetime.fromtimestamp(self._time).strftime("%H:%M:%S.%f")[:-3]
         return f"{self.prefix}[ {t} ] {self._text}{self.suffix}"

@@ -42,6 +42,7 @@ class LoggerApp(App):
     filtered_logs: list[Log] = []
 
     filter_manager = FilterManager()
+    filter_mode = Ids.FILTER_OMIT
 
     MAX_LOGS = 10_000
     MAX_LOG_BUFFER_LEN = 500
@@ -65,7 +66,15 @@ class LoggerApp(App):
         logger.clear()
 
     def filter_and_refresh_logs(self) -> None:
-        self.filter_using_highlight()
+        if self.filter_mode == Ids.FILTER_OMIT:
+            self.filter_using_omit()
+
+        elif self.filter_mode == Ids.FILTER_HIGHLIGHT:
+            self.filter_using_highlight()
+
+        else:
+            raise ValueError(f"No filter mode for {self.filter_mode=}")
+
         self.refresh_logger()
 
     def filter_using_omit(self) -> None:
@@ -79,18 +88,16 @@ class LoggerApp(App):
     def filter_using_highlight(self) -> None:
         logs: list[Log] = []
         for log in self.all_ingested_logs:
-            logs.append(log)
+            log_copy = log.copy()
+            logs.append(log_copy)
 
             if (
                 self.filter_manager.match(log.text)
                 and not self.filter_manager.is_disabled
             ):
-                log.set_prefix("[on #006000]")
-                log.set_suffix("[/on #006000]")
+                log_copy.set_prefix("[on #006000]")
+                log_copy.set_suffix("[/on #006000]")
                 continue
-
-            log.set_prefix("")
-            log.set_suffix("")
 
         self.filtered_logs = logs
 
@@ -139,11 +146,21 @@ class LoggerApp(App):
         self.filter_and_refresh_logs()
 
     @on(RadioButton.Changed)
-    def on_radio_button_changed(self, event: RadioButton.Changed) -> None:
-        id_ = event.radio_button.id
-        value = event.radio_button.value
+    @on(RadioSet.Changed)
+    def on_radio_button_changed(
+        self, event: RadioButton.Changed | RadioSet.Changed
+    ) -> None:
+        id_: str | None
+        value: bool
 
-        refilter = False
+        if isinstance(event, RadioSet.Changed):
+            id_ = event.pressed.id
+            value = event.pressed.value
+        else:
+            id_ = event.radio_button.id
+            value = event.radio_button.value
+
+        refilter = True
 
         match id_:
             case Ids.INGEST_LOGS_TOGGLE:
@@ -152,11 +169,15 @@ class LoggerApp(App):
 
             case Ids.FILTER_TOGGLE:
                 self.filter_manager.filter_active = value
-                refilter = True
 
             case Ids.CASE_INSENSITIVE_TOGGLE:
                 self.filter_manager.case_insensitive = value
-                refilter = True
+
+            case Ids.FILTER_HIGHLIGHT:
+                self.filter_mode = id_
+
+            case Ids.FILTER_OMIT:
+                self.filter_mode = id_
 
             case _:
                 raise ValueError(f"No case for {id_}")
@@ -170,7 +191,13 @@ class LoggerApp(App):
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):
             with Vertical(id="logger-container"):
-                yield RichLog(highlight=True, markup=True, wrap=False, id="logger")
+                yield RichLog(
+                    highlight=True,
+                    markup=True,
+                    wrap=False,
+                    max_lines=self.MAX_LOGS,
+                    id="logger",
+                )
                 yield Input(id="filter")
 
             with Container(id="settings-container"):
@@ -183,6 +210,11 @@ class LoggerApp(App):
                 yield RadioButton(
                     "Case sensitive", value=True, id=Ids.CASE_INSENSITIVE_TOGGLE
                 )
+
+                yield Label("Filter Mode")
+                with RadioSet():
+                    yield RadioButton("Omit", value=True, id=Ids.FILTER_OMIT)
+                    yield RadioButton("Highlight", id=Ids.FILTER_HIGHLIGHT)
 
 
 if __name__ == "__main__":

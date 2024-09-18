@@ -2,3 +2,6 @@ class Ids:
     INGEST_LOGS_TOGGLE = "ingest-logs-toggle"
     FILTER_TOGGLE = "filter-toggle"
     CASE_INSENSITIVE_TOGGLE = "case-insensitive-toggle"
+
+    FILTER_HIGHLIGHT = "filter-highlight-toggle"
+    FILTER_OMIT = "filter-omit-toggle"
