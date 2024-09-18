@@ -35,14 +35,15 @@ class LoggerApp(App):
     filter_manager = FilterManager()
     filter_mode = Ids.FILTER_OMIT
 
-    MAX_LOGS = 10_000
-    MAX_LOG_BUFFER_LEN = 500
+    MAX_INGESTED_LOGS = 100_000
+    MAX_DISPLAY_LOGS = 100
+    MAX_BUFFERED_LOGS = 500
 
     def ingest_log(self, log: str | Log) -> None:
         if isinstance(log, str):
             log = Log(log)
 
-        if len(self.all_ingested_logs) > self.MAX_LOGS:
+        if len(self.all_ingested_logs) > self.MAX_INGESTED_LOGS:
             self.all_ingested_logs.pop(0)
 
         self.all_ingested_logs.append(log)
@@ -116,7 +117,7 @@ class LoggerApp(App):
 
             log_line = parent_conn.recv()
 
-            if len(buffer) > self.MAX_LOG_BUFFER_LEN:
+            if len(buffer) > self.MAX_BUFFERED_LOGS:
                 buffer.pop(0)
 
             buffer.append(Log(log_line))
@@ -186,7 +187,7 @@ class LoggerApp(App):
                     highlight=True,
                     markup=True,
                     wrap=False,
-                    max_lines=self.MAX_LOGS,
+                    max_lines=self.MAX_DISPLAY_LOGS,
                     id="logger",
                 )
                 yield Input(id="filter")
