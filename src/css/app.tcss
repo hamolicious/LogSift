@@ -1,4 +1,12 @@
+.full-width {
+    width: 100%;
+}
+
+.settings-radio-button {
+    width: 100%;
+}
+
 #settings-container {
-    padding-top: 1;
+    padding: 1;
     width: 25%;
 }

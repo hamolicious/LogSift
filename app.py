@@ -1,11 +1,7 @@
-from textual import events, on, work
+from textual import on, work
 from textual.app import App, ComposeResult
-from textual.css.query import NoMatches
-from textual.reactive import var
 from textual.containers import Container, Horizontal, Vertical, Center
 from textual.widgets import (
-    Button,
-    Digits,
     RichLog,
     Input,
     Label,
@@ -14,16 +10,11 @@ from textual.widgets import (
     RadioSet,
 )
 
-import os
-import time
-import datetime
-import sys
 
-import subprocess
 import multiprocessing
-from multiprocessing.connection import Connection
 
 
+from src.components.spacer import Spacer
 from src.log import Log
 from src.logs import read_logs_and_send
 from src.filtering import FilterManager
@@ -205,16 +196,42 @@ class LoggerApp(App):
                     yield Label("Filtering")
                 yield Rule()
 
-                yield RadioButton("Ingest logs", value=True, id=Ids.INGEST_LOGS_TOGGLE)
-                yield RadioButton("Filter", value=True, id=Ids.FILTER_TOGGLE)
+                yield Label("Filter Settings")
+
                 yield RadioButton(
-                    "Case sensitive", value=True, id=Ids.CASE_INSENSITIVE_TOGGLE
+                    "Ingest logs",
+                    value=True,
+                    id=Ids.INGEST_LOGS_TOGGLE,
+                    classes="settings-radio-button",
+                )
+                yield RadioButton(
+                    "Filter",
+                    value=True,
+                    id=Ids.FILTER_TOGGLE,
+                    classes="settings-radio-button",
+                )
+                yield RadioButton(
+                    "Case sensitive",
+                    value=True,
+                    id=Ids.CASE_INSENSITIVE_TOGGLE,
+                    classes="settings-radio-button",
                 )
 
+                yield Spacer()
                 yield Label("Filter Mode")
-                with RadioSet():
-                    yield RadioButton("Omit", value=True, id=Ids.FILTER_OMIT)
-                    yield RadioButton("Highlight", id=Ids.FILTER_HIGHLIGHT)
+
+                with RadioSet(classes="settings-radio-button"):
+                    yield RadioButton(
+                        "Omit",
+                        value=True,
+                        id=Ids.FILTER_OMIT,
+                        classes="full-width",
+                    )
+                    yield RadioButton(
+                        "Highlight",
+                        id=Ids.FILTER_HIGHLIGHT,
+                        classes="full-width",
+                    )
 
 
 if __name__ == "__main__":
