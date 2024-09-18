@@ -74,10 +74,14 @@ def display_status(logs: list[str]) -> None:
     print(f"-= Supalogger captured {len(logs)} logs =-")
 
 
-def main() -> None:
+def start_display_thread() -> None:
     display_thread = threading.Thread(target=log_display_thread)
     display_thread.daemon = True
     display_thread.start()
+
+
+def main() -> None:
+    start_display_thread()
 
     while True:
         log_line = get_log_line()
