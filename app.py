@@ -36,6 +36,7 @@ class LoggerApp(App):
         Binding("o", action=f"toggle_setting('#{Ids.FILTER_OMIT}')"),
         Binding("l", action=f"toggle_setting('#{Ids.FILTER_HIGHLIGHT}')"),
         Binding("b", action=f"toggle_visible('#{Ids.SETTINGS_CONTAINER}')"),
+        Binding("r", action="refresh_logger"),
     ]
 
     ingest_logs = True
@@ -49,6 +50,9 @@ class LoggerApp(App):
     MAX_INGESTED_LOGS = 100_000
     MAX_DISPLAY_LOGS = 100
     MAX_BUFFERED_LOGS = 500
+
+    def action_refresh_logger(self) -> None:
+        self.refresh_logger()
 
     def action_toggle_visible(self, selector: str) -> None:
         self.query_one(selector).toggle_class("hidden")
@@ -120,14 +124,17 @@ class LoggerApp(App):
 
     @work(thread=True)
     def start_updating_logs(self) -> None:
-        parent_conn, child_conn = multiprocessing.Pipe()
+        # fix for macs
+        multiprocessing.set_start_method("fork")
 
         # TODO: implement ingesting logs via piped command
         # TODO: implement run command via UI
         # TODO: implement run command via arg
-        command = "tail -f /var/log/syslog"
+        command = "docker logs -f quotingevent-generator-rabbitmq-1"
+
+        parent_conn, child_conn = multiprocessing.Pipe()
         process = multiprocessing.Process(
-            target=read_logs_and_send, args=(child_conn, command)
+            target=read_logs_and_send, args=(child_conn, command), daemon=True
         )
         process.start()
 
@@ -206,6 +213,7 @@ class LoggerApp(App):
 
     def on_mount(self) -> None:
         self.start_updating_logs()
+        pass
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):

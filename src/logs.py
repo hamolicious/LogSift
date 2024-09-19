@@ -1,5 +1,4 @@
 import subprocess
-import multiprocessing
 from multiprocessing.connection import Connection
 
 
@@ -11,6 +10,6 @@ def read_logs_and_send(pipe_conn: Connection, command: str) -> None:
             return
 
         for line in process.stdout:
-            pipe_conn.send(line.strip())  # Send each line of log
+            pipe_conn.send(line.strip())
 
     pipe_conn.close()
