@@ -52,4 +52,25 @@ BINDINGS: tuple[Binding, ...] = (
         action="refresh_logger",
         description="Refreshes the logger (probably useless)",
     ),
+    Binding(
+        "j,down",
+        action="scroll_logger('down')",
+        description="Scroll logger down",
+    ),
+    Binding(
+        "k,up",
+        action="scroll_logger('up')",
+        description="Scroll logger up",
+    ),
+    # TODO: these dont work
+    Binding(
+        "J",
+        action="scroll_logger('fdown')",
+        description="Scroll logger 10 lines down",
+    ),
+    Binding(
+        "K",
+        action="scroll_logger('fup')",
+        description="Scroll logger 10 lines up",
+    ),
 )

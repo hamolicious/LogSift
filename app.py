@@ -1,3 +1,4 @@
+from typing import Literal, Never
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, Center
@@ -61,6 +62,26 @@ class LoggerApp(App):
 
     def action_toggle_setting(self, selector: str) -> None:
         self.query_one(selector, RadioButton).toggle()
+
+    def action_scroll_logger(
+        self, direction: Literal["up", "down", "fup", "fdown"]
+    ) -> None:
+        def repeat(f, n):
+            return [f() in range(n)]
+
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
+
+        match direction:
+            case "up":
+                logger.scroll_up()
+            case "down":
+                logger.scroll_down()
+            case "fup":
+                repeat(logger.scroll_up, 10)
+            case "fdown":
+                repeat(logger.scroll_down, 10)
+            case _:
+                raise ValueError(f"no case for direction {direction}")
 
     async def action_focus(self, selector: str) -> None:
         self.query_one(selector).focus()
