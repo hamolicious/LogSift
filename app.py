@@ -1,3 +1,4 @@
+import os
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -13,6 +14,7 @@ from textual.widgets import (
 
 
 import multiprocessing
+import sys
 
 
 from src.components.spacer import Spacer
@@ -71,6 +73,8 @@ class LoggerApp(App):
             self.all_ingested_logs.pop(0)
 
         self.all_ingested_logs.append(log)
+
+        self.update_log_count()
         self.filter_and_refresh_logs()
 
     def add_to_logger(self, log_line: str) -> None:
@@ -88,6 +92,7 @@ class LoggerApp(App):
         else:
             raise ValueError(f"No filter mode for {self.filter_mode=}")
 
+        self.update_filtered_log_count()
         self.refresh_logger()
 
     def filter_using_omit(self) -> None:
@@ -123,7 +128,19 @@ class LoggerApp(App):
         for log in self.filtered_logs[-self.MAX_DISPLAY_LOGS : :]:
             self.add_to_logger(str(log))
 
-    @work(thread=True)
+    def update_log_count(self) -> None:
+        label = self.query_one("#" + Ids.LOGS_COUNT, Label)
+
+        label._renderable = f"{len(self.all_ingested_logs)} Logs Ingested"
+        label.refresh()
+
+    def update_filtered_log_count(self) -> None:
+        label = self.query_one("#" + Ids.FILTERED_LOGS_COUNT, Label)
+
+        label._renderable = f"{len(self.filtered_logs)} Filtered Logs"
+        label.refresh()
+
+    @work(thread=True, exclusive=True)
     def start_updating_logs(self) -> None:
         # fix for macs
         multiprocessing.set_start_method("fork")
@@ -131,11 +148,13 @@ class LoggerApp(App):
         # TODO: implement ingesting logs via piped command
         # TODO: implement run command via UI
         # TODO: implement run command via arg
-        command = "docker logs -f quotingevent-generator-rabbitmq-1"
+        command = " ".join(sys.argv[1::])
 
         parent_conn, child_conn = multiprocessing.Pipe()
         process = multiprocessing.Process(
-            target=read_logs_and_send, args=(child_conn, command), daemon=True
+            target=read_logs_and_send,
+            args=(child_conn, command),
+            daemon=True,
         )
         process.start()
 
@@ -233,6 +252,16 @@ class LoggerApp(App):
                 )
 
             with Container(id=Ids.SETTINGS_CONTAINER):
+                with Center():
+                    yield Label("Info")
+                yield Rule()
+
+                yield Label("0 Logs Ingested", id=Ids.LOGS_COUNT, classes="full-width")
+                yield Label(
+                    "0 Filtered Logs", id=Ids.FILTERED_LOGS_COUNT, classes="full-width"
+                )
+
+                yield Spacer()
                 with Center():
                     yield Label("Filtering")
                 yield Rule()

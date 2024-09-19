@@ -4,7 +4,11 @@ from multiprocessing.connection import Connection
 
 def read_logs_and_send(pipe_conn: Connection, command: str) -> None:
     with subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
     ) as process:
         if process.stdout is None:
             return
