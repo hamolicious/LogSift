@@ -1,9 +1,8 @@
 from textual.app import ComposeResult
-from rich.console import ConsoleRenderable, RichCast
-from textual.widgets import Static, Label
+from textual.widgets import Label
 from textual.binding import Binding
 from textual.screen import ModalScreen
-from textual.containers import Grid, Horizontal
+from textual.containers import Grid
 import string
 
 

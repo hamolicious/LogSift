@@ -1,7 +1,5 @@
-import os
 from textual import on, work
 from textual.app import App, ComposeResult
-from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical, Center
 from textual.widgets import (
     RichLog,
@@ -15,7 +13,6 @@ from textual.widgets import (
 
 
 import multiprocessing
-import sys
 
 
 from src.components.spacer import Spacer
@@ -24,6 +21,7 @@ from src.log import Log
 from src.logs import read_logs_and_send
 from src.filtering import FilterManager
 from src.types.ids import Ids
+from src.args import get_args
 from src.bindings import BINDINGS as DEFAULT_BINDINGS
 
 
@@ -31,8 +29,9 @@ class LoggerApp(App):
     """Logging tool"""
 
     CSS_PATH = "src/css/app.tcss"
-
     BINDINGS = list(DEFAULT_BINDINGS)  # to make mypy happy :/
+
+    command = get_args()
 
     ingest_logs = True
     logs_process: multiprocessing.Process | None
@@ -144,15 +143,15 @@ class LoggerApp(App):
 
     @work(thread=True, exclusive=True)
     def start_updating_logs(self) -> None:
+        if self.command is None:
+            return
+
         # TODO: implement ingesting logs via piped command
         # TODO: implement run command via UI
-        command = " ".join(sys.argv[1::])
-        command = "tail -f /var/log/syslog"
-
         parent_conn, child_conn = multiprocessing.Pipe()
         process = multiprocessing.Process(
             target=read_logs_and_send,
-            args=(child_conn, command),
+            args=(child_conn, self.command),
             daemon=True,
         )
         self.logs_process = process
