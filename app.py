@@ -40,7 +40,6 @@ class LoggerApp(App):
 
     ingest_logs = True
 
-    log_pos_pointer = 0
     all_ingested_logs: list[Log] = []
     filtered_logs: list[Log] = []
 
