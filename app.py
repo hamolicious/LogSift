@@ -28,7 +28,7 @@ class LoggerApp(App):
     CSS_PATH = "src/css/app.tcss"
 
     BINDINGS = [
-        Binding("s", action="focus_filter"),
+        Binding("s", action=f"focus('#{Ids.FILTER}')"),
         Binding("p", action=f"toggle_setting('#{Ids.INGEST_LOGS_TOGGLE}')"),
         Binding("f", action=f"toggle_setting('#{Ids.FILTER_TOGGLE}')"),
         Binding("m", action=f"toggle_setting('#{Ids.MATCH_ALL}')"),
@@ -57,8 +57,8 @@ class LoggerApp(App):
     def action_toggle_setting(self, selector: str) -> None:
         self.query_one(selector, RadioButton).toggle()
 
-    def action_focus_filter(self) -> None:
-        self.query_one("#" + Ids.FILTER, Input).focus()
+    async def action_focus(self, selector: str) -> None:
+        self.query_one(selector).focus()
 
     def ingest_log(self, log: str | Log) -> None:
         if isinstance(log, str):
