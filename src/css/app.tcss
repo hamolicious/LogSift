@@ -13,4 +13,5 @@
 #settings-container {
     padding: 1;
     width: 25%;
+    background: $panel;
 }

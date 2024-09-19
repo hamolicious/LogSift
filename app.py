@@ -51,7 +51,7 @@ class LoggerApp(App):
     filter_mode = Ids.FILTER_OMIT
 
     MAX_INGESTED_LOGS = 100_000
-    MAX_DISPLAY_LOGS = 100
+    MAX_DISPLAY_LOGS = 500
     MAX_BUFFERED_LOGS = 500
 
     def action_refresh_logger(self) -> None:
@@ -76,7 +76,8 @@ class LoggerApp(App):
         self.all_ingested_logs.append(log)
 
         self.update_log_count()
-        self.filter_and_refresh_logs()
+        self.add_to_logger(str(log))
+        # self.filter_and_refresh_logs()
 
     def add_to_logger(self, log_line: str) -> None:
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
@@ -132,13 +133,13 @@ class LoggerApp(App):
     def update_log_count(self) -> None:
         label = self.query_one("#" + Ids.LOGS_COUNT, Label)
 
-        label._renderable = f"{len(self.all_ingested_logs)} Logs Ingested"
+        label._renderable = f"{len(self.all_ingested_logs):,} Logs Ingested"
         label.refresh()
 
     def update_filtered_log_count(self) -> None:
         label = self.query_one("#" + Ids.FILTERED_LOGS_COUNT, Label)
 
-        label._renderable = f"{len(self.filtered_logs)} Filtered Logs"
+        label._renderable = f"{len(self.filtered_logs):,} Filtered Logs"
         label.refresh()
 
     @work(thread=True, exclusive=True)
@@ -255,7 +256,7 @@ class LoggerApp(App):
                     tooltip="(f) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
                 )
 
-            with Container(id=Ids.SETTINGS_CONTAINER):
+            with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
                 with Center():
                     yield Label("Info")
                 yield Rule()
@@ -330,3 +331,6 @@ if __name__ == "__main__":
 
     app = LoggerApp()
     app.run()
+
+    # release logs before exiting
+    print("\n".join(map(str, app.all_ingested_logs)))
