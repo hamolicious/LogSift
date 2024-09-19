@@ -30,9 +30,9 @@ class LoggerApp(App):
     CSS_PATH = "src/css/app.tcss"
 
     BINDINGS = [
-        Binding("s", action=f"focus('#{Ids.FILTER}')"),
+        Binding("f", action=f"focus('#{Ids.FILTER}')"),
         Binding("p", action=f"toggle_setting('#{Ids.INGEST_LOGS_TOGGLE}')"),
-        Binding("f", action=f"toggle_setting('#{Ids.FILTER_TOGGLE}')"),
+        Binding("t", action=f"toggle_setting('#{Ids.FILTER_TOGGLE}')"),
         Binding("m", action=f"toggle_setting('#{Ids.MATCH_ALL}')"),
         Binding("c", action=f"toggle_setting('#{Ids.CASE_INSENSITIVE_TOGGLE}')"),
         Binding("o", action=f"toggle_setting('#{Ids.FILTER_OMIT}')"),
@@ -248,7 +248,7 @@ class LoggerApp(App):
                 yield Input(
                     placeholder="Filter",
                     id=Ids.FILTER,
-                    tooltip="(s) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
+                    tooltip="(f) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
                 )
 
             with Container(id=Ids.SETTINGS_CONTAINER):
@@ -284,7 +284,7 @@ class LoggerApp(App):
                     value=True,
                     id=Ids.FILTER_TOGGLE,
                     classes="settings-radio-button",
-                    tooltip="(f) Toggle enforcing filter",
+                    tooltip="(t) Toggle enforcing filter",
                 )
                 yield RadioButton(
                     "Match All",
