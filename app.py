@@ -77,10 +77,6 @@ class LoggerApp(App):
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
         logger.write(log_line)
 
-    def clear_logger(self) -> None:
-        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
-        logger.clear()
-
     def filter_and_refresh_logs(self) -> None:
         if self.filter_mode == Ids.FILTER_OMIT:
             self.filter_using_omit()
@@ -117,9 +113,13 @@ class LoggerApp(App):
 
         self.filtered_logs = logs
 
+    def clear_logger(self) -> None:
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
+        logger.clear()
+
     def refresh_logger(self) -> None:
         self.clear_logger()
-        for log in self.filtered_logs:
+        for log in self.filtered_logs[-self.MAX_DISPLAY_LOGS : :]:
             self.add_to_logger(str(log))
 
     @work(thread=True)
