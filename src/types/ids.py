@@ -2,11 +2,14 @@ class Ids:
     LOGGER = "logger"
     FILTER = "filter"
     SETTINGS_CONTAINER = "settings-container"
+    HELP = "help-panel"
+    FILTER_CONTAINER = "filter-container"
+    HELP_BUTTON = "help-button"
 
     LOGS_COUNT = "logs-count"
     FILTERED_LOGS_COUNT = "filtered-logs-count"
 
-    INGEST_LOGS_TOGGLE = "ingest-logs-toggle"
+    PAUSE_DISPLAYING_LOGS_TOGGLE = "pause-displaying-logs-toggle"
     FILTER_TOGGLE = "filter-toggle"
     CASE_INSENSITIVE_TOGGLE = "case-insensitive-toggle"
 

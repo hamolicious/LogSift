@@ -6,6 +6,9 @@
     width: 100%;
 }
 
+.app-container {
+}
+
 .settings-radio-button {
     width: 100%;
 }
@@ -14,4 +17,20 @@
     padding: 1;
     width: 25%;
     background: $panel;
+}
+
+#filter-container {
+    height: 3;
+    width: 100%;
+}
+
+#filter {
+    width: 97%;
+}
+
+#help-button {
+    padding: 0;
+    margin: 0;
+    min-width: 5;
+    width: 5;
 }

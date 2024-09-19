@@ -5,6 +5,7 @@ from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical, Center
 from textual.widgets import (
     RichLog,
+    Button,
     Input,
     Label,
     RadioButton,
@@ -18,10 +19,12 @@ import sys
 
 
 from src.components.spacer import Spacer
+from src.components.keybinds import KeybindsInfo
 from src.log import Log
 from src.logs import read_logs_and_send
 from src.filtering import FilterManager
 from src.types.ids import Ids
+from src.bindings import BINDINGS as DEFAULT_BINDINGS
 
 
 class LoggerApp(App):
@@ -29,17 +32,7 @@ class LoggerApp(App):
 
     CSS_PATH = "src/css/app.tcss"
 
-    BINDINGS = [
-        Binding("f", action=f"focus('#{Ids.FILTER}')"),
-        Binding("p", action=f"toggle_setting('#{Ids.INGEST_LOGS_TOGGLE}')"),
-        Binding("t", action=f"toggle_setting('#{Ids.FILTER_TOGGLE}')"),
-        Binding("m", action=f"toggle_setting('#{Ids.MATCH_ALL}')"),
-        Binding("c", action=f"toggle_setting('#{Ids.CASE_INSENSITIVE_TOGGLE}')"),
-        Binding("o", action=f"toggle_setting('#{Ids.FILTER_OMIT}')"),
-        Binding("l", action=f"toggle_setting('#{Ids.FILTER_HIGHLIGHT}')"),
-        Binding("b", action=f"toggle_visible('#{Ids.SETTINGS_CONTAINER}')"),
-        Binding("r", action="refresh_logger"),
-    ]
+    BINDINGS = list(DEFAULT_BINDINGS)  # to make mypy happy :/
 
     ingest_logs = True
     logs_process: multiprocessing.Process | None
@@ -59,6 +52,13 @@ class LoggerApp(App):
 
     def action_toggle_visible(self, selector: str) -> None:
         self.query_one(selector).toggle_class("hidden")
+
+    @work
+    async def action_show_help(self) -> None:
+        # probably a better way of doing it
+        await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
+        await self.push_screen_wait(KeybindsInfo(self.BINDINGS))
+        await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
 
     def action_toggle_setting(self, selector: str) -> None:
         self.query_one(selector, RadioButton).toggle()
@@ -82,6 +82,15 @@ class LoggerApp(App):
     def add_to_logger(self, log_line: str) -> None:
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
         logger.write(log_line)
+
+    def clear_logger(self) -> None:
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
+        logger.clear()
+
+    def refresh_logger(self) -> None:
+        self.clear_logger()
+        for log in self.filtered_logs[-self.MAX_DISPLAY_LOGS : :]:
+            self.add_to_logger(str(log))
 
     @work(thread=True, exclusive=True)
     def filter_and_refresh_logs(self) -> None:
@@ -121,15 +130,6 @@ class LoggerApp(App):
 
         self.filtered_logs = logs
 
-    def clear_logger(self) -> None:
-        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
-        logger.clear()
-
-    def refresh_logger(self) -> None:
-        self.clear_logger()
-        for log in self.filtered_logs[-self.MAX_DISPLAY_LOGS : :]:
-            self.add_to_logger(str(log))
-
     def update_log_count(self) -> None:
         label = self.query_one("#" + Ids.LOGS_COUNT, Label)
 
@@ -147,6 +147,7 @@ class LoggerApp(App):
         # TODO: implement ingesting logs via piped command
         # TODO: implement run command via UI
         command = " ".join(sys.argv[1::])
+        command = "tail -f /var/log/syslog"
 
         parent_conn, child_conn = multiprocessing.Pipe()
         process = multiprocessing.Process(
@@ -185,6 +186,14 @@ class LoggerApp(App):
         self.filter_manager.set_filter(event.value)
         self.filter_and_refresh_logs()
 
+    @on(Button.Pressed)
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        match event.button.id:
+            case Ids.HELP_BUTTON:
+                await self.run_action("show_help")
+            case _:
+                raise ValueError(f"no button handler for case: {Ids.HELP_BUTTON}")
+
     @on(RadioButton.Changed)
     @on(RadioSet.Changed)
     def on_radio_button_changed(
@@ -203,7 +212,7 @@ class LoggerApp(App):
         refilter = True
 
         match id_:
-            case Ids.INGEST_LOGS_TOGGLE:
+            case Ids.PAUSE_DISPLAYING_LOGS_TOGGLE:
                 self.ingest_logs = value
                 refilter = value is True
 
@@ -238,7 +247,6 @@ class LoggerApp(App):
 
     def on_mount(self) -> None:
         self.start_updating_logs()
-        pass
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):
@@ -250,11 +258,20 @@ class LoggerApp(App):
                     max_lines=self.MAX_DISPLAY_LOGS,
                     id=Ids.LOGGER,
                 )
-                yield Input(
-                    placeholder="Filter",
-                    id=Ids.FILTER,
-                    tooltip="(f) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
-                )
+
+                with Horizontal(id=Ids.FILTER_CONTAINER):
+                    yield Input(
+                        placeholder="Filter",
+                        id=Ids.FILTER,
+                        tooltip="(f) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
+                    )
+
+                    yield Button(
+                        "?",
+                        variant="primary",
+                        id=Ids.HELP_BUTTON,
+                        tooltip="(shift+h) Open help panel",
+                    )
 
             with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
                 with Center():
@@ -274,11 +291,11 @@ class LoggerApp(App):
                 yield Label("Ingestion Settings")
 
                 yield RadioButton(
-                    "Ingest logs",
+                    "Pause displaying logs",
                     value=True,
-                    id=Ids.INGEST_LOGS_TOGGLE,
+                    id=Ids.PAUSE_DISPLAYING_LOGS_TOGGLE,
                     classes="settings-radio-button",
-                    tooltip="(p) Toggle ingestion of logs, while off, the app still buffers incoming logs and will flush that buffer once re-enabled.",
+                    tooltip="(p) Pauses logs being added to the logger window",
                 )
 
                 yield Spacer()
