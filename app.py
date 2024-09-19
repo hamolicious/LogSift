@@ -42,6 +42,7 @@ class LoggerApp(App):
     ]
 
     ingest_logs = True
+    logs_process: multiprocessing.Process | None
 
     all_ingested_logs: list[Log] = []
     filtered_logs: list[Log] = []
@@ -142,12 +143,8 @@ class LoggerApp(App):
 
     @work(thread=True, exclusive=True)
     def start_updating_logs(self) -> None:
-        # fix for macs
-        multiprocessing.set_start_method("fork")
-
         # TODO: implement ingesting logs via piped command
         # TODO: implement run command via UI
-        # TODO: implement run command via arg
         command = " ".join(sys.argv[1::])
 
         parent_conn, child_conn = multiprocessing.Pipe()
@@ -156,6 +153,7 @@ class LoggerApp(App):
             args=(child_conn, command),
             daemon=True,
         )
+        self.logs_process = process
         process.start()
 
         buffer: list[Log] = []
@@ -180,8 +178,6 @@ class LoggerApp(App):
                 self.ingest_log(log)
 
             buffer = []
-
-        process.join()
 
     @on(Input.Changed)
     def on_input_changed(self, event: Input.Changed) -> None:
@@ -230,6 +226,14 @@ class LoggerApp(App):
 
         if refilter:
             self.filter_and_refresh_logs()
+
+    def on_exit_app(self) -> None:
+        if self.logs_process is None:
+            return
+
+        self.logs_process.terminate()
+        self.logs_process.join(1)
+        self.logs_process.close()
 
     def on_mount(self) -> None:
         self.start_updating_logs()
@@ -321,5 +325,8 @@ class LoggerApp(App):
 
 
 if __name__ == "__main__":
+    # fix for macs
+    multiprocessing.set_start_method("fork")
+
     app = LoggerApp()
     app.run()
