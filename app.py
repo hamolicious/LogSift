@@ -77,6 +77,7 @@ class LoggerApp(App):
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
         logger.write(log_line)
 
+    @work(thread=True, exclusive=True)
     def filter_and_refresh_logs(self) -> None:
         if self.filter_mode == Ids.FILTER_OMIT:
             self.filter_using_omit()
