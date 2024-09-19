@@ -1,5 +1,6 @@
 from textual import on, work
 from textual.app import App, ComposeResult
+from textual.binding import Binding
 from textual.containers import Container, Horizontal, Vertical, Center
 from textual.widgets import (
     RichLog,
@@ -26,6 +27,17 @@ class LoggerApp(App):
 
     CSS_PATH = "src/css/app.tcss"
 
+    BINDINGS = [
+        Binding("s", action="focus_filter"),
+        Binding("p", action=f"toggle_setting('#{Ids.INGEST_LOGS_TOGGLE}')"),
+        Binding("f", action=f"toggle_setting('#{Ids.FILTER_TOGGLE}')"),
+        Binding("m", action=f"toggle_setting('#{Ids.MATCH_ALL}')"),
+        Binding("c", action=f"toggle_setting('#{Ids.CASE_INSENSITIVE_TOGGLE}')"),
+        Binding("o", action=f"toggle_setting('#{Ids.FILTER_OMIT}')"),
+        Binding("l", action=f"toggle_setting('#{Ids.FILTER_HIGHLIGHT}')"),
+        Binding("b", action=f"toggle_visible('#{Ids.SETTINGS_CONTAINER}')"),
+    ]
+
     ingest_logs = True
 
     log_pos_pointer = 0
@@ -39,6 +51,15 @@ class LoggerApp(App):
     MAX_DISPLAY_LOGS = 100
     MAX_BUFFERED_LOGS = 500
 
+    def action_toggle_visible(self, selector: str) -> None:
+        self.query_one(selector).toggle_class("hidden")
+
+    def action_toggle_setting(self, selector: str) -> None:
+        self.query_one(selector, RadioButton).toggle()
+
+    def action_focus_filter(self) -> None:
+        self.query_one("#" + Ids.FILTER, Input).focus()
+
     def ingest_log(self, log: str | Log) -> None:
         if isinstance(log, str):
             log = Log(log)
@@ -50,11 +71,11 @@ class LoggerApp(App):
         self.filter_and_refresh_logs()
 
     def add_to_logger(self, log_line: str) -> None:
-        logger = self.query_one("#logger", RichLog)
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
         logger.write(log_line)
 
     def clear_logger(self) -> None:
-        logger = self.query_one("#logger", RichLog)
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
         logger.clear()
 
     def filter_and_refresh_logs(self) -> None:
@@ -101,6 +122,10 @@ class LoggerApp(App):
     @work(thread=True)
     def start_updating_logs(self) -> None:
         parent_conn, child_conn = multiprocessing.Pipe()
+
+        # TODO: implement ingesting logs via piped command
+        # TODO: implement run command via UI
+        # TODO: implement run command via arg
         command = "tail -f /var/log/syslog"
         process = multiprocessing.Process(
             target=read_logs_and_send, args=(child_conn, command)
@@ -191,15 +216,15 @@ class LoggerApp(App):
                     markup=True,
                     wrap=False,
                     max_lines=self.MAX_DISPLAY_LOGS,
-                    id="logger",
+                    id=Ids.LOGGER,
                 )
                 yield Input(
                     placeholder="Filter",
-                    id="filter",
-                    tooltip="Filter logs\n- terms are separated by space\n- use '!' to invert terms",
+                    id=Ids.FILTER,
+                    tooltip="(s) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
                 )
 
-            with Container(id="settings-container"):
+            with Container(id=Ids.SETTINGS_CONTAINER):
                 with Center():
                     yield Label("Filtering")
                 yield Rule()
@@ -211,7 +236,7 @@ class LoggerApp(App):
                     value=True,
                     id=Ids.INGEST_LOGS_TOGGLE,
                     classes="settings-radio-button",
-                    tooltip="Toggle ingestion of logs, while off, the app still buffers incoming logs and will flush that buffer once re-enabled.",
+                    tooltip="(p) Toggle ingestion of logs, while off, the app still buffers incoming logs and will flush that buffer once re-enabled.",
                 )
 
                 yield Spacer()
@@ -222,21 +247,21 @@ class LoggerApp(App):
                     value=True,
                     id=Ids.FILTER_TOGGLE,
                     classes="settings-radio-button",
-                    tooltip="Toggle enforcing filter",
+                    tooltip="(f) Toggle enforcing filter",
                 )
                 yield RadioButton(
                     "Match All",
                     value=False,
                     id=Ids.MATCH_ALL,
                     classes="settings-radio-button",
-                    tooltip="Matches either all or at least 1 term from filter",
+                    tooltip="(m) Matches either all or at least 1 term from filter",
                 )
                 yield RadioButton(
                     "Case insensitive",
                     value=True,
                     id=Ids.CASE_INSENSITIVE_TOGGLE,
                     classes="settings-radio-button",
-                    tooltip="Toggle case sensitivity/insensitivity",
+                    tooltip="(c) Toggle case sensitivity/insensitivity",
                 )
 
                 yield Spacer()
@@ -248,13 +273,13 @@ class LoggerApp(App):
                         value=True,
                         id=Ids.FILTER_OMIT,
                         classes="full-width",
-                        tooltip="Omit non-matching logs",
+                        tooltip="(o) Omit non-matching logs",
                     )
                     yield RadioButton(
                         "Highlight",
                         id=Ids.FILTER_HIGHLIGHT,
                         classes="full-width",
-                        tooltip="Highlight matching logs",
+                        tooltip="(l) Highlight matching logs",
                     )
 
 
