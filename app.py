@@ -275,7 +275,7 @@ class LoggerApp(App):
 
             with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
                 with Center():
-                    yield Label("Info")
+                    yield Label("Info", classes="title")
                 yield Rule()
 
                 yield Label("0 Logs Ingested", id=Ids.LOGS_COUNT, classes="full-width")
@@ -285,7 +285,7 @@ class LoggerApp(App):
 
                 yield Spacer()
                 with Center():
-                    yield Label("Filtering")
+                    yield Label("Filtering", classes="title")
                 yield Rule()
 
                 yield Label("Ingestion Settings")
