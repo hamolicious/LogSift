@@ -56,6 +56,16 @@ class LoggerApp(App):
     def action_toggle_visible(self, selector: str) -> None:
         self.query_one(selector).toggle_class("hidden")
 
+    def get_logs(self) -> list[Log]:
+        return (
+            self.all_ingested_logs
+            if self.filter_manager.is_disabled
+            else self.filtered_logs
+        )
+
+    def action_log(self) -> None:
+        self.ingest_log("value")
+
     @work
     async def action_show_help(self) -> None:
         # probably a better way of doing it
@@ -67,12 +77,7 @@ class LoggerApp(App):
         self.query_one(selector, RadioButton).toggle()
 
     def action_copy_shown(self) -> None:
-        logs = (
-            self.all_ingested_logs
-            if self.filter_manager.is_disabled
-            else self.filtered_logs
-        )
-        text = "\n".join(map(str, logs))
+        text = "\n".join(map(str, self.get_logs()))
         current_os = platform.platform(aliased=True, terse=True)
         path = tempfile.mktemp()
 
@@ -140,7 +145,7 @@ class LoggerApp(App):
         if clear:
             self.clear_logger()
 
-        for log in self.filtered_logs[-self.MAX_DISPLAY_LOGS : :]:
+        for log in self.get_logs()[-self.MAX_DISPLAY_LOGS : :]:
             self.add_to_logger(str(log))
 
     @work(thread=True, exclusive=True)
@@ -302,8 +307,6 @@ class LoggerApp(App):
 
     def on_mount(self) -> None:
         self.start_updating_logs()
-
-        self.ingest_log("no timestamp")
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):
