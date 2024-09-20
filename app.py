@@ -345,7 +345,7 @@ class LoggerApp(App):
                     yield Input(
                         placeholder="Filter",
                         id=Ids.FILTER,
-                        tooltip="(f) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
+                        tooltip='(f) Filter logs\n- terms are separated by space\n- use \'!\' to invert terms\n- group terms with spaces with `"`, e.g "term1 term2"',
                         validate_on=["changed"],
                         validators=[self.build_filter_validator()],
                         valid_empty=True,
