@@ -1,3 +1,5 @@
+import os
+import platform
 from typing import Literal, Never
 from textual import on, work
 from textual.app import App, ComposeResult
@@ -14,6 +16,7 @@ from textual.widgets import (
 
 
 import multiprocessing
+import tempfile
 
 
 from src.components.spacer import Spacer
@@ -62,6 +65,28 @@ class LoggerApp(App):
 
     def action_toggle_setting(self, selector: str) -> None:
         self.query_one(selector, RadioButton).toggle()
+
+    def action_copy_shown(self) -> None:
+        logs = (
+            self.all_ingested_logs
+            if self.filter_manager.is_disabled
+            else self.filtered_logs
+        )
+        text = "\n".join(map(str, logs))
+        current_os = platform.platform(aliased=True, terse=True)
+        path = tempfile.mktemp()
+
+        with open(path, "w") as f:
+            f.write(text)
+
+        if "Linux" in current_os:
+            os.system(f"cat {path} | xclip -sel clip")
+        if "MacOS" in current_os:
+            os.system(f"cat {path} | pbcopy")
+        else:
+            raise NotImplementedError(f"Copying not implemented for {current_os=}")
+
+        os.remove(path)
 
     def action_scroll_logger(
         self, direction: Literal["up", "down", "fup", "fdown"]
