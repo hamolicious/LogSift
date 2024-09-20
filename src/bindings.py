@@ -3,6 +3,11 @@ from src.types.ids import Ids
 
 BINDINGS: tuple[Binding, ...] = (
     Binding(
+        "L",
+        action="log",
+        description="Logs a value to the logger (development only)",
+    ),
+    Binding(
         "f",
         action=f"focus('#{Ids.FILTER}')",
         description="Focuses the filter input",
@@ -46,11 +51,6 @@ BINDINGS: tuple[Binding, ...] = (
         "H",
         action="show_help",
         description="Toggle help panel visibility",
-    ),
-    Binding(
-        "r",
-        action="refresh_logger",
-        description="Refreshes the logger (probably useless)",
     ),
     Binding(
         "j,down",
