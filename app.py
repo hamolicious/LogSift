@@ -109,6 +109,7 @@ class LoggerApp(App):
     @work
     async def action_show_docs(self) -> None:
         # probably a better way of doing it
+        # BUG: Opening docs somehow stops logs from logging.
         await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
         await self.push_screen_wait(Documentation())
         await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
@@ -324,6 +325,7 @@ class LoggerApp(App):
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):
             with Vertical(id="logger-container"):
+                # TODO: add pagination
                 yield RichLog(
                     highlight=True,  # TODO: use this for highlighting
                     markup=True,
