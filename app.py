@@ -96,6 +96,10 @@ class LoggerApp(App):
         self.all_ingested_logs.append(log)
 
         self.update_log_count()
+
+        if not self.filter_manager.match(str(log)):
+            return
+
         self.add_to_logger(str(log))
         # self.filter_and_refresh_logs()
 
@@ -107,8 +111,10 @@ class LoggerApp(App):
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
         logger.clear()
 
-    def refresh_logger(self) -> None:
-        self.clear_logger()
+    def refresh_logger(self, clear: bool = False) -> None:
+        if clear:
+            self.clear_logger()
+
         for log in self.filtered_logs[-self.MAX_DISPLAY_LOGS : :]:
             self.add_to_logger(str(log))
 
@@ -124,7 +130,7 @@ class LoggerApp(App):
             raise ValueError(f"No filter mode for {self.filter_mode=}")
 
         self.update_filtered_log_count()
-        self.refresh_logger()
+        self.refresh_logger(clear=True)
 
     def filter_using_omit(self) -> None:
         self.filtered_logs = list(
