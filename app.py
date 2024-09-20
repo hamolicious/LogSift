@@ -21,10 +21,10 @@ import multiprocessing
 import tempfile
 
 
+from src.log_collection import LogManager
 from src.components.spacer import Spacer
 from src.components.keybinds import KeybindsInfo
 from src.log import Log
-from src.logs import read_logs_and_send
 from src.filtering import FilterManager
 from src.types.ids import Ids
 from src.args import get_args
@@ -48,9 +48,19 @@ class LoggerApp(App):
     filter_manager = FilterManager()
     filter_mode = Ids.FILTER_OMIT
 
+    logs_manager: LogManager
+
     MAX_INGESTED_LOGS = 100_000
     MAX_DISPLAY_LOGS = 500
     MAX_BUFFERED_LOGS = 500
+
+    def initialise_backend(self) -> None:
+        command = get_args()
+        if command is None:
+            return
+
+        self.logs_manager = LogManager(command, self.ingest_log)
+        self.logs_manager.run()
 
     def action_refresh_logger(self) -> None:
         self.refresh_logger()
@@ -215,46 +225,6 @@ class LoggerApp(App):
         label._renderable = self.filter_manager.build_explanation()
         label.refresh(layout=True)
 
-    # TODO: move all log collecting to separate place
-    @work(thread=True, exclusive=True)
-    def start_updating_logs(self) -> None:
-        if self.command is None:
-            return
-
-        # TODO: implement ingesting logs via piped command
-        # TODO: implement run command via UI
-        parent_conn, child_conn = multiprocessing.Pipe()
-        process = multiprocessing.Process(
-            target=read_logs_and_send,
-            args=(child_conn, self.command),
-            daemon=True,
-        )
-        self.logs_process = process
-        process.start()
-
-        buffer: list[Log] = []
-
-        # TODO: how do I force-trigger this when ingest logs is toggled on?
-        # currently: need to wait for a new log to flush buffer
-        while process.is_alive() or parent_conn.poll():
-            if not parent_conn.poll():
-                continue
-
-            log_line = parent_conn.recv()
-
-            if len(buffer) > self.MAX_BUFFERED_LOGS:
-                buffer.pop(0)
-
-            buffer.append(Log(log_line))
-
-            if not self.ingest_logs:
-                continue
-
-            for log in buffer:
-                self.ingest_log(log)
-
-            buffer = []
-
     @on(Input.Changed)
     def on_input_changed(self, event: Input.Changed) -> None:
         self.filter_manager.set_filter(event.value)
@@ -334,7 +304,7 @@ class LoggerApp(App):
         return FilterValid(self.filter_manager.validate)
 
     def on_mount(self) -> None:
-        self.start_updating_logs()
+        self.initialise_backend()
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):
