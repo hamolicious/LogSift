@@ -74,6 +74,23 @@ class FilterManager:
 
         return terms
 
+    def build_explanation(self) -> str:
+        terms = self.decode()
+        explanation = ["Matches any logs that contain: "]
+
+        joiner = "and" if self.match_all else "or"
+        joiner = f"[italic]{joiner}[/italic]"
+
+        for term in terms:
+            inverse = "not " if term.startswith("!") else ""
+            color = "green" if inverse == "" else "red"
+            term = term if inverse == "" else term[1::]
+
+            explanation.append(f"{inverse}[{color}]`{term}`[/{color}]")
+            explanation.append(joiner)
+
+        return " ".join(explanation[:-1:])
+
     def match(self, log_line: str) -> bool:
         if self.is_disabled:
             return True

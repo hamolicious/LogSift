@@ -168,6 +168,7 @@ class LoggerApp(App):
             raise ValueError(f"No filter mode for {self.filter_mode=}")
 
         self.update_filtered_log_count()
+        self.update_filter_explanation()
         self.refresh_logger(clear=True)
 
     def filter_using_omit(self) -> None:
@@ -209,6 +210,11 @@ class LoggerApp(App):
 
         label._renderable = f"{count:,} Filtered Logs"
         label.refresh()
+
+    def update_filter_explanation(self) -> None:
+        label = self.query_one("#" + Ids.FILTER_EXPLANATION, Label)
+        label._renderable = self.filter_manager.build_explanation()
+        label.refresh(layout=True)
 
     @work(thread=True, exclusive=True)
     def start_updating_logs(self) -> None:
@@ -367,6 +373,7 @@ class LoggerApp(App):
                 yield Label(
                     "0 Filtered Logs", id=Ids.FILTERED_LOGS_COUNT, classes="full-width"
                 )
+                yield Label("", id=Ids.FILTER_EXPLANATION, classes="full-width")
 
                 yield Spacer()
                 with Center():

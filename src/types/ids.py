@@ -8,6 +8,7 @@ class Ids:
 
     LOGS_COUNT = "logs-count"
     FILTERED_LOGS_COUNT = "filtered-logs-count"
+    FILTER_EXPLANATION = "filter-explanation"
 
     PAUSE_DISPLAYING_LOGS_TOGGLE = "pause-displaying-logs-toggle"
     FILTER_TOGGLE = "filter-toggle"
