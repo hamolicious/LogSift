@@ -215,6 +215,7 @@ class LoggerApp(App):
         label._renderable = self.filter_manager.build_explanation()
         label.refresh(layout=True)
 
+    # TODO: move all log collecting to separate place
     @work(thread=True, exclusive=True)
     def start_updating_logs(self) -> None:
         if self.command is None:
@@ -339,14 +340,16 @@ class LoggerApp(App):
         with Horizontal(id="app-container"):
             with Vertical(id="logger-container"):
                 yield RichLog(
-                    highlight=True,
+                    highlight=True,  # TODO: use this for highlighting
                     markup=True,
-                    wrap=False,
+                    wrap=False,  # TODO: build toggle for this
                     max_lines=self.MAX_DISPLAY_LOGS,
                     id=Ids.LOGGER,
+                    auto_scroll=True,  # TODO: need to build toggle for this
                 )
 
                 with Horizontal(id=Ids.FILTER_CONTAINER):
+                    # TODO: I want to be able to exit focus using escape
                     yield Input(
                         placeholder="Filter",
                         id=Ids.FILTER,
@@ -363,6 +366,7 @@ class LoggerApp(App):
                         tooltip="(shift+h) Open help panel",
                     )
 
+            # TODO: build separate settings container
             with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
                 with Center():
                     yield Label("Info", classes="title")
@@ -375,11 +379,11 @@ class LoggerApp(App):
                 yield Label("", id=Ids.FILTER_EXPLANATION, classes="full-width")
 
                 yield Spacer()
-                with Center():
+                with Center():  # TODO: heading component
                     yield Label("Filtering", classes="title")
                 yield Rule()
 
-                yield Label("Ingestion Settings")
+                yield Label("Ingestion Settings")  # TODO: sort out naming of shit
 
                 yield RadioButton(
                     "Pause displaying logs",
@@ -390,7 +394,7 @@ class LoggerApp(App):
                 )
 
                 yield Spacer()
-                yield Label("Filter Settings")
+                yield Label("Filter Settings")  # TODO: title component
 
                 yield RadioButton(
                     "Filter Active",
@@ -429,7 +433,7 @@ class LoggerApp(App):
                         "Highlight",
                         id=Ids.FILTER_HIGHLIGHT,
                         classes="full-width",
-                        tooltip="(l) Highlight matching logs",
+                        tooltip="(l) Highlight matching logs",  # TODO: maybe automate the keybinds tooltip?
                     )
 
 
