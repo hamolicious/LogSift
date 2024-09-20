@@ -54,6 +54,8 @@ class LoggerApp(App):
     MAX_DISPLAY_LOGS = 500
     MAX_BUFFERED_LOGS = 500
 
+    # Backend
+
     def initialise_backend(self) -> None:
         command = get_args()
         if command is None:
@@ -62,11 +64,7 @@ class LoggerApp(App):
         self.logs_manager = LogManager(command, self.ingest_log)
         self.logs_manager.run()
 
-    def action_refresh_logger(self) -> None:
-        self.refresh_logger()
-
-    def action_toggle_visible(self, selector: str) -> None:
-        self.query_one(selector).toggle_class("hidden")
+    # Logs
 
     def get_logs(self) -> list[Log]:
         return (
@@ -74,6 +72,30 @@ class LoggerApp(App):
             if self.filter_manager.is_disabled
             else self.filtered_logs
         )
+
+    def ingest_log(self, log: str | Log) -> None:
+        if isinstance(log, str):
+            log = Log(log)
+
+        if len(self.all_ingested_logs) > self.MAX_INGESTED_LOGS:
+            self.all_ingested_logs.pop(0)
+
+        self.all_ingested_logs.append(log)
+
+        self.update_log_count()
+
+        if not self.filter_manager.match(str(log)):
+            return
+
+        self.add_to_logger(str(log))
+
+    # Actions
+
+    def action_refresh_logger(self) -> None:
+        self.refresh_logger()
+
+    def action_toggle_visible(self, selector: str) -> None:
+        self.query_one(selector).toggle_class("hidden")
 
     def action_log(self) -> None:
         terms = []
@@ -133,22 +155,7 @@ class LoggerApp(App):
     async def action_focus(self, selector: str) -> None:
         self.query_one(selector).focus()
 
-    def ingest_log(self, log: str | Log) -> None:
-        if isinstance(log, str):
-            log = Log(log)
-
-        if len(self.all_ingested_logs) > self.MAX_INGESTED_LOGS:
-            self.all_ingested_logs.pop(0)
-
-        self.all_ingested_logs.append(log)
-
-        self.update_log_count()
-
-        if not self.filter_manager.match(str(log)):
-            return
-
-        self.add_to_logger(str(log))
-        # self.filter_and_refresh_logs()
+    # Logger
 
     def add_to_logger(self, log_line: str) -> None:
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
@@ -164,6 +171,8 @@ class LoggerApp(App):
 
         for log in self.get_logs()[-self.MAX_DISPLAY_LOGS : :]:
             self.add_to_logger(str(log))
+
+    # Filtering
 
     @work(thread=True, exclusive=True)
     def filter_and_refresh_logs(self) -> None:
@@ -225,11 +234,26 @@ class LoggerApp(App):
         label._renderable = self.filter_manager.build_explanation()
         label.refresh(layout=True)
 
+    # Input
+
     @on(Input.Changed)
     def on_input_changed(self, event: Input.Changed) -> None:
         self.filter_manager.set_filter(event.value)
 
         self.filter_and_refresh_logs()
+
+    def build_filter_validator(self) -> Validator:
+        class FilterValid(Validator):
+            def __init__(
+                self, validator: Callable, failure_description: str | None = None
+            ) -> None:
+                super().__init__(failure_description)
+                self.validate_func = validator
+
+            def validate(self, value: str) -> ValidationResult:
+                return self.success() if self.validate_func(value) else self.failure()
+
+        return FilterValid(self.filter_manager.validate)
 
     @on(Button.Pressed)
     async def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -282,6 +306,8 @@ class LoggerApp(App):
         if refilter:
             self.filter_and_refresh_logs()
 
+    # App control
+
     def on_exit_app(self) -> None:
         if self.logs_process is None:
             return
@@ -290,21 +316,10 @@ class LoggerApp(App):
         self.logs_process.join(1)
         self.logs_process.close()
 
-    def build_filter_validator(self) -> Validator:
-        class FilterValid(Validator):
-            def __init__(
-                self, validator: Callable, failure_description: str | None = None
-            ) -> None:
-                super().__init__(failure_description)
-                self.validate_func = validator
-
-            def validate(self, value: str) -> ValidationResult:
-                return self.success() if self.validate_func(value) else self.failure()
-
-        return FilterValid(self.filter_manager.validate)
-
     def on_mount(self) -> None:
         self.initialise_backend()
+
+    # Rendering
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):

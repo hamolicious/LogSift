@@ -7,23 +7,6 @@ from multiprocessing.connection import Connection
 import threading
 
 
-def read_logs_and_send(pipe_conn: Connection, command: str) -> None:
-    with subprocess.Popen(
-        command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    ) as process:
-        if process.stdout is None:
-            return
-
-        for line in process.stdout:
-            pipe_conn.send(line.strip())
-
-    pipe_conn.close()
-
-
 class LogManager:
     MAX_BUFFERED_LOGS = 1000
 
@@ -37,29 +20,31 @@ class LogManager:
     def set_command(self, command: str) -> None:
         self._command = command
 
-    def run(self) -> None:
-        command_process, pipe = self._setup_command_in_background()
+    # Command running process
 
-        log_collection_thread = threading.Thread(
-            target=self._worker,
-            args=(
-                command_process,
-                pipe,
-            ),
-            daemon=True,
-        )
+    def _command_process(self, pipe_conn: Connection, command: str) -> None:
+        with subprocess.Popen(
+            command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        ) as process:
+            if process.stdout is None:
+                return
 
-        command_process.start()
-        log_collection_thread.start()
+            for line in process.stdout:
+                pipe_conn.send(line.strip())
+
+        pipe_conn.close()
 
     def _setup_command_in_background(
         self,
     ) -> tuple[multiprocessing.Process, multiprocessing.connection.Connection]:
         # TODO: implement ingesting logs via piped command
-        # TODO: implement run command via UI
         parent_conn, child_conn = multiprocessing.Pipe()
         process = multiprocessing.Process(
-            target=read_logs_and_send,
+            target=self._command_process,
             args=(child_conn, self._command),
             daemon=True,
         )
@@ -67,14 +52,14 @@ class LogManager:
 
         return process, parent_conn
 
-    def stop(self) -> None:
-        self._running = False
+    def _start_command_process(self):
+        command_process, pipe = self._setup_command_in_background()
+        command_process.start()
+        return command_process, pipe
 
-        self.logs_process.terminate()
-        self.logs_process.join()
-        self.logs_process.close()
+    # Log collection thread
 
-    def _worker(
+    def _logs_thread_worker(
         self,
         process: multiprocessing.Process,
         connection: multiprocessing.connection.Connection,
@@ -101,3 +86,34 @@ class LogManager:
                 self.log_callback(log)
 
             buffer = []
+
+    def _set_up_log_collection_thread(
+        self,
+        process: multiprocessing.Process,
+        connection: multiprocessing.connection.Connection,
+    ) -> threading.Thread:
+        log_collection_thread = threading.Thread(
+            target=self._logs_thread_worker,
+            args=(process, connection),
+            daemon=True,
+        )
+        return log_collection_thread
+
+    def _start_log_collection(self, command_process, pipe):
+        log_collection_thread = self._set_up_log_collection_thread(
+            command_process, pipe
+        )
+        log_collection_thread.start()
+
+    # Flow control
+
+    def run(self) -> None:
+        command_process, pipe = self._start_command_process()
+        self._start_log_collection(command_process, pipe)
+
+    def stop(self) -> None:
+        self._running = False
+
+        self.logs_process.terminate()
+        self.logs_process.join()
+        self.logs_process.close()
