@@ -1,17 +1,23 @@
 import time
 import datetime
+import dateutil
+import dateutil.parser
 
 
 class Log:
     def __init__(self, text: str) -> None:
         self._text = text
-        self._time = time.time()
-        self._time_str = datetime.datetime.fromtimestamp(self._time).strftime(
-            "%H:%M:%S.%f"
-        )[:-3]
+
+        self._ingest_time = time.time()
+        self._time_ingest_str = datetime.datetime.fromtimestamp(
+            self._ingest_time
+        ).strftime("%H:%M:%S.%f")[:-3]
 
         self._prefix = ""
         self._suffix = ""
+
+        self._stated_timestamp: float | None = None
+        self._extract_data()
 
     def set_prefix(self, value: str):
         self._prefix = value
@@ -25,7 +31,7 @@ class Log:
 
     @property
     def time(self) -> float:
-        return self._time
+        return self._ingest_time
 
     @property
     def prefix(self) -> str:
@@ -37,9 +43,22 @@ class Log:
 
     def copy(self):
         copied_log = type(self)(self._text)
-        copied_log._time = self._time
+        copied_log._ingest_time = self._ingest_time
 
         return copied_log
 
     def __str__(self) -> str:
         return f"{self.prefix}{self._text}{self.suffix}"
+
+    def _extract_timestamp(self) -> None:
+        potential_stamps = self.text.split(" ")
+        for stamp in potential_stamps:
+            try:
+                dt = dateutil.parser.isoparse(stamp).timestamp()
+                self._stated_timestamp = dt
+                return
+            except ValueError:
+                continue
+
+    def _extract_data(self) -> None:
+        self._extract_timestamp()

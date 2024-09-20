@@ -303,6 +303,8 @@ class LoggerApp(App):
     def on_mount(self) -> None:
         self.start_updating_logs()
 
+        self.ingest_log("no timestamp")
+
     def compose(self) -> ComposeResult:
         with Horizontal(id="app-container"):
             with Vertical(id="logger-container"):
