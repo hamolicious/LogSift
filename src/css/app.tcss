@@ -36,6 +36,10 @@ LoggerApp {
     width: 100%;
 }
 
+#logger {
+    padding-left: 2;
+}
+
 #filter {
     width: 97%;
 }
