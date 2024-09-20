@@ -6,6 +6,9 @@ class Log:
     def __init__(self, text: str) -> None:
         self._text = text
         self._time = time.time()
+        self._time_str = datetime.datetime.fromtimestamp(self._time).strftime(
+            "%H:%M:%S.%f"
+        )[:-3]
 
         self._prefix = ""
         self._suffix = ""
@@ -39,5 +42,4 @@ class Log:
         return copied_log
 
     def __str__(self) -> str:
-        t = datetime.datetime.fromtimestamp(self._time).strftime("%H:%M:%S.%f")[:-3]
-        return f"{self.prefix}[ {t} ] {self._text}{self.suffix}"
+        return f"{self.prefix}{self._text}{self.suffix}"
