@@ -104,9 +104,6 @@ class LoggerApp(App):
     def action_scroll_logger(
         self, direction: Literal["up", "down", "fup", "fdown"]
     ) -> None:
-        def repeat(f, n):
-            return [f() in range(n)]
-
         logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
 
         match direction:
@@ -115,9 +112,11 @@ class LoggerApp(App):
             case "down":
                 logger.scroll_down()
             case "fup":
-                repeat(logger.scroll_up, 10)
+                for _ in range(10):
+                    logger.scroll_up()
             case "fdown":
-                repeat(logger.scroll_down, 10)
+                for _ in range(10):
+                    logger.scroll_down()
             case _:
                 raise ValueError(f"no case for direction {direction}")
 

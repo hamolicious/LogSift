@@ -63,12 +63,6 @@ BINDINGS: tuple[Binding, ...] = (
         description="Scroll logger up",
     ),
     Binding(
-        "C",
-        action="copy_shown",
-        description="Copy filtered logs to clipboard",
-    ),
-    # TODO: these dont work
-    Binding(
         "J",
         action="scroll_logger('fdown')",
         description="Scroll logger 10 lines down",
@@ -77,5 +71,10 @@ BINDINGS: tuple[Binding, ...] = (
         "K",
         action="scroll_logger('fup')",
         description="Scroll logger 10 lines up",
+    ),
+    Binding(
+        "C",
+        action="copy_shown",
+        description="Copy filtered logs to clipboard",
     ),
 )
