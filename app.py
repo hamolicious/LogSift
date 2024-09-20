@@ -81,7 +81,7 @@ class LoggerApp(App):
 
         if "Linux" in current_os:
             os.system(f"cat {path} | xclip -sel clip")
-        if "MacOS" in current_os:
+        elif "MacOS" in current_os:
             os.system(f"cat {path} | pbcopy")
         else:
             raise NotImplementedError(f"Copying not implemented for {current_os=}")
