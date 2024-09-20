@@ -18,7 +18,7 @@ class KeybindsInfo(ModalScreen):
             width: 75%;
             height: 75%;
             background: $panel;
-            grid-size: 5 10;
+            grid-size: 5 15;
         }
 
         .keybind-info-card {
