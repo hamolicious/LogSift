@@ -49,8 +49,8 @@ BINDINGS: tuple[Binding, ...] = (
     ),
     Binding(
         "H",
-        action="show_help",
-        description="Toggle help panel visibility",
+        action="show_docs",
+        description="Toggle docs panel visibility",
     ),
     Binding(
         "j,down",

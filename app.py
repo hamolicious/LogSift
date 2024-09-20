@@ -23,7 +23,7 @@ import tempfile
 
 from src.log_collection import LogManager
 from src.components.spacer import Spacer
-from src.components.keybinds import KeybindsInfo
+from src.components.documentation import Documentation
 from src.log import Log
 from src.filtering import FilterManager
 from src.types.ids import Ids
@@ -107,10 +107,10 @@ class LoggerApp(App):
         self.ingest_log(Log(", ".join(terms)))
 
     @work
-    async def action_show_help(self) -> None:
+    async def action_show_docs(self) -> None:
         # probably a better way of doing it
         await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
-        await self.push_screen_wait(KeybindsInfo(self.BINDINGS))
+        await self.push_screen_wait(Documentation())
         await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
 
     def action_toggle_setting(self, selector: str) -> None:
@@ -259,7 +259,7 @@ class LoggerApp(App):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case Ids.HELP_BUTTON:
-                await self.run_action("show_help")
+                await self.run_action("show_docs")
             case _:
                 raise ValueError(f"no button handler for case: {Ids.HELP_BUTTON}")
 
@@ -348,7 +348,7 @@ class LoggerApp(App):
                         "?",
                         variant="primary",
                         id=Ids.HELP_BUTTON,
-                        tooltip="(shift+h) Open help panel",
+                        tooltip="(shift+h) Open docs panel",
                     )
 
             # TODO: build separate settings container
