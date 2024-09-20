@@ -55,14 +55,25 @@ class KeybindsInfo(ModalScreen):
         classes: str | None = None,
     ) -> None:
         super().__init__(name, id, classes)
-        self.source_bindings = bindings
+        self.source_bindings = self.sorted(bindings)
+
+    def sorted(self, bindings: tuple[Binding, ...]) -> tuple[Binding, ...]:
+        return tuple(sorted(bindings, key=lambda bind: bind.key))
 
     def build_card(self, binding: Binding) -> Label:
         key = binding.key
-        char = key if key in string.ascii_lowercase else f"shift+{key.lower()}"
+        char = ",".join(
+            [
+                f"shift+{k.lower()}" if k in string.ascii_uppercase else k
+                for k in key.split(",")
+            ]
+        )
+        char_line = ",".join(
+            [f"[bold underline]{k}[/bold underline]" for k in char.split(",")]
+        )
 
         return Label(
-            f"  [bold underline]{char}[/bold underline]\n{binding.description}",
+            f"{char_line}\n{binding.description}",
             classes="keybind-info-card",
         )
 
