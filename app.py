@@ -1,9 +1,11 @@
+from collections.abc import Callable
 import os
 import platform
 from typing import Literal, Never
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.containers import Container, Horizontal, Vertical, Center
+from textual.validation import Validator, ValidationResult
 from textual.widgets import (
     RichLog,
     Button,
@@ -64,7 +66,13 @@ class LoggerApp(App):
         )
 
     def action_log(self) -> None:
-        self.ingest_log("value")
+        terms = []
+        try:
+            terms = self.filter_manager.decoder.run(self.filter_manager.filter)
+        except ValueError:
+            terms = self.filter_manager.decoder.run(self.filter_manager.filter + '"')
+
+        self.ingest_log(Log(", ".join(terms)))
 
     @work
     async def action_show_help(self) -> None:
@@ -244,6 +252,7 @@ class LoggerApp(App):
     @on(Input.Changed)
     def on_input_changed(self, event: Input.Changed) -> None:
         self.filter_manager.set_filter(event.value)
+
         self.filter_and_refresh_logs()
 
     @on(Button.Pressed)
@@ -305,6 +314,19 @@ class LoggerApp(App):
         self.logs_process.join(1)
         self.logs_process.close()
 
+    def build_filter_validator(self) -> Validator:
+        class FilterValid(Validator):
+            def __init__(
+                self, validator: Callable, failure_description: str | None = None
+            ) -> None:
+                super().__init__(failure_description)
+                self.validate_func = validator
+
+            def validate(self, value: str) -> ValidationResult:
+                return self.success() if self.validate_func(value) else self.failure()
+
+        return FilterValid(self.filter_manager.validate)
+
     def on_mount(self) -> None:
         self.start_updating_logs()
 
@@ -324,6 +346,9 @@ class LoggerApp(App):
                         placeholder="Filter",
                         id=Ids.FILTER,
                         tooltip="(f) Filter logs\n- terms are separated by space\n- use '!' to invert terms",
+                        validate_on=["changed"],
+                        validators=[self.build_filter_validator()],
+                        valid_empty=True,
                     )
 
                     yield Button(

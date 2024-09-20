@@ -1,4 +1,9 @@
+from .term_decoder import TermDecoder
+
+
 class FilterManager:
+    decoder = TermDecoder()
+
     def __init__(self) -> None:
         self._filter = ""
 
@@ -8,14 +13,27 @@ class FilterManager:
 
     @property
     def is_disabled(self) -> bool:
-        return not self._filter_active or self.filter == ""
+        return (
+            not self._filter_active
+            or self.filter == ""
+            or len(self.decode()) == 0
+            or self.decode()[0] == ""
+        )
 
     @property
     def filter(self):
         return self._filter
 
-    def set_filter(self, filter_: str) -> None:
+    def validate(self, override_filter: str | None = None) -> bool:
+        try:
+            self.decoder.run(override_filter or self.filter)
+            return True
+        except ValueError:
+            return False
+
+    def set_filter(self, filter_: str) -> bool:
         self._filter = filter_
+        return self.validate()
 
     @property
     def match_all(self):
@@ -44,22 +62,29 @@ class FilterManager:
             raise ValueError("Case insensitive must be a boolean")
         self._case_insensitive = value
 
-    def handle_case(self, value: str) -> str:
+    def handle_case_sensitivity(self, value: str) -> str:
         return value.lower() if self.case_insensitive else value
+
+    def decode(self) -> list[str]:
+        terms = []
+        try:
+            terms = self.decoder.run(self.filter)
+        except ValueError:
+            terms = self.decoder.run(self.filter + '"')
+
+        return terms
 
     def match(self, log_line: str) -> bool:
         if self.is_disabled:
             return True
 
-        terms = filter(
-            lambda term: term != "", self.handle_case(self.filter).split(" ")
-        )
+        terms = self.decode()
 
         def _match_term(term: str) -> bool:
             inverted = term.startswith("!")
-            matcher = term[1::] if inverted else term
+            matcher = self.handle_case_sensitivity(term[1::] if inverted else term)
 
-            value = matcher in self.handle_case(log_line)
+            value = matcher in self.handle_case_sensitivity(log_line)
 
             return (not value) if inverted else value
 
