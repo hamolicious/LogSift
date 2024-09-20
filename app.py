@@ -165,7 +165,11 @@ class LoggerApp(App):
     def update_filtered_log_count(self) -> None:
         label = self.query_one("#" + Ids.FILTERED_LOGS_COUNT, Label)
 
-        label._renderable = f"{len(self.filtered_logs):,} Filtered Logs"
+        count = 0
+        if not self.filter_manager.is_disabled:
+            count = len(self.filtered_logs)
+
+        label._renderable = f"{count:,} Filtered Logs"
         label.refresh()
 
     @work(thread=True, exclusive=True)
