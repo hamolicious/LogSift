@@ -76,7 +76,7 @@ class FilterManager:
 
     def build_explanation(self) -> str:
         terms = self.decode()
-        explanation = ["Matches any logs that contain: "]
+        explanation = ["Matches any log that contains: "]
 
         joiner = "and" if self.match_all else "or"
         joiner = f"[italic]{joiner}[/italic]"
