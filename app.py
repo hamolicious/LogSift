@@ -39,7 +39,6 @@ class LoggerApp(App):
 
     command = get_args()
 
-    ingest_logs = True
     logs_process: multiprocessing.Process | None
 
     all_ingested_logs: list[Log] = []
@@ -276,9 +275,12 @@ class LoggerApp(App):
         refilter = True
 
         match id_:
-            case Ids.PAUSE_DISPLAYING_LOGS_TOGGLE:
-                self.ingest_logs = value
-                refilter = value is True
+            case Ids.PAUSE_INGESTING_LOGS_TOGGLE:
+                self.logs_manager.ingest_logs = not value
+
+                if value is False:
+                    refilter = True
+                    self.logs_manager.flush_buffer()
 
             case Ids.FILTER_TOGGLE:
                 self.filter_manager.filter_active = value
@@ -347,7 +349,7 @@ class LoggerApp(App):
                         tooltip="(shift+h) Open docs panel",
                     )
 
-            yield Documentation(id=Ids.DOCUMENTATION_CONTAINER)
+            yield Documentation(id=Ids.DOCUMENTATION_CONTAINER, classes="hidden")
 
             # TODO: build separate settings container
             with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
@@ -369,11 +371,11 @@ class LoggerApp(App):
                 yield Label("Ingestion Settings")  # TODO: sort out naming of shit
 
                 yield RadioButton(
-                    "Pause displaying logs",
-                    value=True,
-                    id=Ids.PAUSE_DISPLAYING_LOGS_TOGGLE,
+                    "Pause ingesting logs",
+                    value=False,
+                    id=Ids.PAUSE_INGESTING_LOGS_TOGGLE,
                     classes="settings-radio-button",
-                    tooltip="(p) Pauses logs being added to the logger window",
+                    tooltip="(p) Pause logs being ingested",
                 )
 
                 yield Spacer()

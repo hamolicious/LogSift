@@ -18,11 +18,14 @@ The filter input accepts terms, which are space-separated strings. You can combi
 - `!term`: Excludes logs containing `term`.
 
 ### Ingestion
-The application continuously ingests logs from the provided command using `LogManager`. Logs are stored in memory, with a maximum limit of `100,000`. The ingestion process can be paused but so nothing gets lost, logs are still collected just not processed yet. Logs that don't match the filter can be excluded from the display.
+The application continuously ingests logs from the provided command using `LogManager`. The ingestion process can be paused but so nothing gets lost, logs are still collected just not processed yet. Logs that don't match the filter can be excluded from the display.
 
 - `MAX_INGESTED_LOGS = 100,000`: Maximum number of logs to keep in memory.
 - `MAX_DISPLAY_LOGS = 500`: Maximum number of logs shown in the display.
+- `MAX_BUFFERED_LOGS = 500`: Maximum number of logs buffered awaiting ingestion.
 - You can pause the log ingestion through a toggle button or using (p)
+
+Upon reaching any of the above limits, storage switches to FILO for the system in question.
 
 ---
 
@@ -59,7 +62,7 @@ Supalogger offers two main filtering modes for logs:
 | Keybind          | Description                                                                 |
 |------------------|-----------------------------------------------------------------------------|
 | `f`              | Focuses the filter input.                                                   |
-| `p`              | Pauses the listing of logs.                                                 |
+| `p`              | Pause ingesting logs, when toggled off, buffer will be flushed                                                 |
 | `t`              | Toggles enforcing the filter.                                               |
 | `m`              | Toggles between matching all terms or any term from the filter.             |
 | `c`              | Toggles case sensitivity.                                                   |
@@ -73,8 +76,12 @@ Supalogger offers two main filtering modes for logs:
 | `shift+j`        | Scrolls the logger down 10 lines.                                           |
 | `shift+c`        | Copies the filtered logs to the clipboard.                                  |
 
-<!-- TODO: add glossary -->
-<!-- ## Glossary
-| Term             | Description                                                                 |
-|------------------|-----------------------------------------------------------------------------|
-| `f`              | Focuses the filter input.                                                   | -->
+## Glossary
+### log collection
+Collecting logs refers to reading piped log-lines and storing the raw log
+
+### log ingesting
+Ingesting logs refers to processing the log into memory
+
+### buffer
+Refers to the internal, temporary buffer for storing logs while ingestion is paused.

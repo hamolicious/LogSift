@@ -14,7 +14,7 @@ BINDINGS: tuple[Binding, ...] = (
     ),
     Binding(
         "p",
-        action=f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')",
+        action=f"toggle_setting('#{Ids.PAUSE_INGESTING_LOGS_TOGGLE}')",
         description="Pause listing of logs",
     ),
     Binding(

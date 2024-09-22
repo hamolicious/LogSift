@@ -20,8 +20,8 @@ class Documentation(Static):
         Binding("escape", "dismiss", "close self"),
     ]
 
-    def __init__(self, id: str = "") -> None:
-        super().__init__(id=id)
+    def __init__(self, id: str = "", classes: str = "") -> None:
+        super().__init__(id=id, classes=classes)
 
     def load_docs(self) -> str:
         with open("docs/Introduction.md", "r") as f:

@@ -15,6 +15,8 @@ class LogManager:
         self.ingest_logs = True
         self.log_callback: Callable = log_callback
 
+        self._internal_buffer: list[Log] = []
+
         self._running = True
 
     def set_command(self, command: str) -> None:
@@ -64,28 +66,27 @@ class LogManager:
         process: multiprocessing.Process,
         connection: multiprocessing.connection.Connection,
     ) -> None:
-        buffer: list[Log] = []
-
-        # TODO: how do I force-trigger this when ingest logs is toggled on?
-        # currently: need to wait for a new log to flush buffer
         while process.is_alive() or connection.poll():
             if not connection.poll():
                 continue
 
             log_line = connection.recv()
 
-            if len(buffer) > self.MAX_BUFFERED_LOGS:
-                buffer.pop(0)
+            if len(self._internal_buffer) > self.MAX_BUFFERED_LOGS:
+                self._internal_buffer.pop(0)
 
-            buffer.append(Log(log_line))
+            self._internal_buffer.append(Log(log_line))
 
             if not self.ingest_logs:
                 continue
 
-            for log in buffer:
-                self.log_callback(log)
+            self.flush_buffer()
 
-            buffer = []
+            self._internal_buffer = []
+
+    def flush_buffer(self):
+        for log in self._internal_buffer:
+            self.log_callback(log)
 
     def _set_up_log_collection_thread(
         self,

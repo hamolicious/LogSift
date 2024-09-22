@@ -11,7 +11,7 @@ class Ids:
     FILTERED_LOGS_COUNT = "filtered-logs-count"
     FILTER_EXPLANATION = "filter-explanation"
 
-    PAUSE_DISPLAYING_LOGS_TOGGLE = "pause-displaying-logs-toggle"
+    PAUSE_INGESTING_LOGS_TOGGLE = "pause-ingesting-logs-toggle"
     FILTER_TOGGLE = "filter-toggle"
     CASE_INSENSITIVE_TOGGLE = "case-insensitive-toggle"
 
