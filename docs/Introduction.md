@@ -48,8 +48,8 @@ Supalogger provides several settings to refine how the filter is applied:
 ### Word Wrap
 - Toggles word-wrapping logs
 
-### Word Wrap
-- Toggles word-wrapping logs
+### Auto scroll
+- Toggle scrolling to the bottom on new log added
 
 ---
 
