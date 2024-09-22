@@ -82,4 +82,9 @@ BINDINGS: tuple[Binding, ...] = (
         action=f"toggle_setting('#{Ids.WORD_WRAP_TOGGLE}')",
         description="Toggle word-wrapping logs",
     ),
+    Binding(
+        "a",
+        action=f"toggle_setting('#{Ids.AUTO_SCROLL_TOGGLE}')",
+        description="Toggle scrolling to the bottom on new log added",
+    ),
 )

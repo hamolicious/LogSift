@@ -48,6 +48,9 @@ Supalogger provides several settings to refine how the filter is applied:
 ### Word Wrap
 - Toggles word-wrapping logs
 
+### Word Wrap
+- Toggles word-wrapping logs
+
 ---
 
 ### Filtering Modes
@@ -75,6 +78,7 @@ Supalogger offers two main filtering modes for logs:
 | `l`              | Highlights matching logs.                                                   |
 | `b`              | Toggles visibility of the settings panel.                                   |
 | `w`              | Toggle word-wrapping logs.                                                   |
+| `a`              | Toggle scrolling to the bottom on new log added.                                                   |
 | `shift+h`        | Toggles the documentation panel visibility.                                 |
 | `k` / `up`       | Scrolls the logger up.                                                      |
 | `shift+k`        | Scrolls the logger up 10 lines.                                             |

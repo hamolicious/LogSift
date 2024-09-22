@@ -4,7 +4,7 @@ import platform
 from typing import Literal, Never
 from textual import on, work
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical, Center
+from textual.containers import Container, Horizontal, Vertical, Center, VerticalScroll
 from textual.validation import Validator, ValidationResult
 from textual.widgets import (
     RichLog,
@@ -173,6 +173,15 @@ class LoggerApp(App):
         await logger.recompose()
         self.refresh_logger(clear=True)
 
+    async def update_autoscroll(self) -> None:
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
+        setting = self.query_one(f"#{Ids.AUTO_SCROLL_TOGGLE}", RadioButton)
+
+        logger.auto_scroll = setting.value
+
+        await logger.recompose()
+        self.refresh_logger(clear=True)
+
     # Filtering
 
     @work(thread=True, exclusive=True)
@@ -309,6 +318,9 @@ class LoggerApp(App):
             case Ids.WORD_WRAP_TOGGLE:
                 await self.update_word_wrap()
 
+            case Ids.AUTO_SCROLL_TOGGLE:
+                await self.update_autoscroll()
+
             case _:
                 raise ValueError(f"No case for {id_}")
 
@@ -340,7 +352,7 @@ class LoggerApp(App):
                     wrap=False,
                     max_lines=self.MAX_DISPLAY_LOGS,
                     id=Ids.LOGGER,
-                    auto_scroll=True,  # TODO: need to build toggle for this
+                    auto_scroll=True,
                 )
 
                 with Horizontal(id=Ids.FILTER_CONTAINER):
@@ -362,7 +374,7 @@ class LoggerApp(App):
                     )
 
             # TODO: build separate settings container
-            with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
+            with VerticalScroll(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
                 with Center():
                     yield Label("Info", classes="title")
                 yield Rule()
@@ -436,6 +448,13 @@ class LoggerApp(App):
                     yield Label("Display Settings", classes="title")
                 yield Rule()
 
+                yield RadioButton(
+                    "Autoscroll",
+                    value=True,
+                    id=Ids.AUTO_SCROLL_TOGGLE,
+                    classes="settings-radio-button",
+                    tooltip="(a) Toggle scrolling to the bottom on new log added",
+                )
                 yield RadioButton(
                     "Word Wrap",
                     value=False,

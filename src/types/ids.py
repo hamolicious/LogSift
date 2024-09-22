@@ -15,6 +15,7 @@ class Ids:
     FILTER_TOGGLE = "filter-toggle"
     CASE_INSENSITIVE_TOGGLE = "case-insensitive-toggle"
     WORD_WRAP_TOGGLE = "word-wrap-toggle"
+    AUTO_SCROLL_TOGGLE = "auto-scroll-toggle"
 
     FILTER_HIGHLIGHT = "filter-highlight-toggle"
     FILTER_OMIT = "filter-omit-toggle"
