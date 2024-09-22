@@ -72,3 +72,9 @@ Supalogger offers two main filtering modes for logs:
 | `j` / `down`     | Scrolls the logger down.                                                    |
 | `shift+j`        | Scrolls the logger down 10 lines.                                           |
 | `shift+c`        | Copies the filtered logs to the clipboard.                                  |
+
+<!-- TODO: add glossary -->
+<!-- ## Glossary
+| Term             | Description                                                                 |
+|------------------|-----------------------------------------------------------------------------|
+| `f`              | Focuses the filter input.                                                   | -->

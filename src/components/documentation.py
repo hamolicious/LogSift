@@ -1,5 +1,4 @@
 from textual.app import ComposeResult
-from textual.screen import ModalScreen
 from textual.widgets import MarkdownViewer, Label, Static
 from textual.containers import Container
 from textual.binding import Binding
@@ -14,9 +13,6 @@ class Documentation(Static):
         #body {
             padding: 1;
             background: $panel;
-        }
-
-        MarkdownViewer {
         }
     """
 
