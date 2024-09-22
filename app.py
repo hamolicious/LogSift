@@ -38,8 +38,6 @@ class LoggerApp(App):
 
     command = get_args()
 
-    logs_process: multiprocessing.Process | None
-
     all_ingested_logs: list[Log] = []
     filtered_logs: list[Log] = []
 
@@ -329,12 +327,7 @@ class LoggerApp(App):
     # App control
 
     def on_exit_app(self) -> None:
-        if self.logs_process is None:
-            return
-
-        self.logs_process.terminate()
-        self.logs_process.join(1)
-        self.logs_process.close()
+        self.logs_manager.stop()
 
     def on_mount(self) -> None:
         self.initialise_backend()
