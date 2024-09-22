@@ -349,8 +349,6 @@ class LoggerApp(App):
                         tooltip="(shift+h) Open docs panel",
                     )
 
-            yield Documentation(id=Ids.DOCUMENTATION_CONTAINER, classes="hidden")
-
             # TODO: build separate settings container
             with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
                 with Center():
@@ -420,6 +418,8 @@ class LoggerApp(App):
                         classes="full-width",
                         tooltip="(l) Highlight matching logs",  # TODO: maybe automate the keybinds tooltip?
                     )
+
+            yield Documentation(id=Ids.DOCUMENTATION_CONTAINER, classes="hidden")
 
 
 if __name__ == "__main__":
