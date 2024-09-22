@@ -2,6 +2,7 @@ class Ids:
     LOGGER = "logger"
     FILTER = "filter"
     SETTINGS_CONTAINER = "settings-container"
+    DOCUMENTATION_CONTAINER = "documentation-container"
     HELP = "help-panel"
     FILTER_CONTAINER = "filter-container"
     HELP_BUTTON = "help-button"

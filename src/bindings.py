@@ -49,7 +49,7 @@ BINDINGS: tuple[Binding, ...] = (
     ),
     Binding(
         "H",
-        action="show_docs",
+        action=f"toggle_visible('#{Ids.DOCUMENTATION_CONTAINER}')",
         description="Toggle docs panel visibility",
     ),
     Binding(

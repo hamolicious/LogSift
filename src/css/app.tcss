@@ -31,6 +31,14 @@ LoggerApp {
     dock: right;
 }
 
+#documentation-container {
+    padding: 1;
+    width: 95%;
+    background: $panel;
+    layer: above;
+    dock: right;
+}
+
 #filter-container {
     height: 3;
     width: 100%;

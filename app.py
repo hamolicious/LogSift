@@ -106,14 +106,6 @@ class LoggerApp(App):
 
         self.ingest_log(Log(", ".join(terms)))
 
-    @work
-    async def action_show_docs(self) -> None:
-        # probably a better way of doing it
-        # BUG: Opening docs somehow stops logs from logging.
-        await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
-        await self.push_screen_wait(Documentation())
-        await self.run_action(f"toggle_setting('#{Ids.PAUSE_DISPLAYING_LOGS_TOGGLE}')")
-
     def action_toggle_setting(self, selector: str) -> None:
         self.query_one(selector, RadioButton).toggle()
 
@@ -260,7 +252,9 @@ class LoggerApp(App):
     async def on_button_pressed(self, event: Button.Pressed) -> None:
         match event.button.id:
             case Ids.HELP_BUTTON:
-                await self.run_action("show_docs")
+                await self.run_action(
+                    f"toggle_visible('#{Ids.DOCUMENTATION_CONTAINER}')"
+                )
             case _:
                 raise ValueError(f"no button handler for case: {Ids.HELP_BUTTON}")
 
@@ -352,6 +346,8 @@ class LoggerApp(App):
                         id=Ids.HELP_BUTTON,
                         tooltip="(shift+h) Open docs panel",
                     )
+
+            yield Documentation(id=Ids.DOCUMENTATION_CONTAINER)
 
             # TODO: build separate settings container
             with Container(id=Ids.SETTINGS_CONTAINER, classes="hidden"):

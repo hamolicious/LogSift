@@ -1,11 +1,11 @@
 from textual.app import ComposeResult
 from textual.screen import ModalScreen
-from textual.widgets import MarkdownViewer, Label
+from textual.widgets import MarkdownViewer, Label, Static
 from textual.containers import Container
 from textual.binding import Binding
 
 
-class Documentation(ModalScreen):
+class Documentation(Static):
     DEFAULT_CSS = """
         Documentation {
             align: center middle;
@@ -13,17 +13,7 @@ class Documentation(ModalScreen):
 
         #body {
             padding: 1;
-            width: 80%;
-            height: 80%;
             background: $panel;
-        }
-
-        #title {
-            background: $primary;
-            color: $text;
-            padding-left: 1;
-            width: 15%;
-            height: 1;
         }
 
         MarkdownViewer {
@@ -34,8 +24,8 @@ class Documentation(ModalScreen):
         Binding("escape", "dismiss", "close self"),
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, id: str = "") -> None:
+        super().__init__(id=id)
 
     def load_docs(self) -> str:
         with open("docs/Introduction.md", "r") as f:
