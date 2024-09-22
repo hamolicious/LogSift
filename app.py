@@ -1,10 +1,10 @@
 from collections.abc import Callable
 import os
 import platform
-from typing import Literal, Never
+from typing import Literal
 from textual import on, work
 from textual.app import App, ComposeResult
-from textual.containers import Container, Horizontal, Vertical, Center, VerticalScroll
+from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.validation import Validator, ValidationResult
 from textual.widgets import (
     RichLog,
@@ -12,7 +12,6 @@ from textual.widgets import (
     Input,
     Label,
     RadioButton,
-    Rule,
     RadioSet,
 )
 
@@ -21,8 +20,8 @@ import multiprocessing
 import tempfile
 
 
+from src.components.title import Title
 from src.log_collection import LogManager
-from src.components.spacer import Spacer
 from src.components.documentation import Documentation
 from src.log import Log
 from src.filtering import FilterManager
@@ -375,9 +374,7 @@ class LoggerApp(App):
 
             # TODO: build separate settings container
             with VerticalScroll(id=Ids.SETTINGS_CONTAINER, classes="hidden"):
-                with Center():
-                    yield Label("Info", classes="title")
-                yield Rule()
+                yield Title("Info", variant="h1", padding=False)
 
                 yield Label("0 Logs Ingested", id=Ids.LOGS_COUNT, classes="full-width")
                 yield Label(
@@ -385,12 +382,11 @@ class LoggerApp(App):
                 )
                 yield Label("", id=Ids.FILTER_EXPLANATION, classes="full-width")
 
-                yield Spacer()
-                with Center():  # TODO: heading component
-                    yield Label("Filtering", classes="title")
-                yield Rule()
+                yield Title("Filtering", variant="h1")
 
-                yield Label("Ingestion Settings")  # TODO: sort out naming of shit
+                yield Title(
+                    "Ingestion Settings", variant="h2"
+                )  # TODO: sort out naming of shit
 
                 yield RadioButton(
                     "Pause Ingesting Logs",
@@ -400,8 +396,7 @@ class LoggerApp(App):
                     tooltip="(p) Pause logs being ingested",
                 )
 
-                yield Spacer()
-                yield Label("Filter Settings")  # TODO: title component
+                yield Title("Filter Settings", variant="h2")
 
                 yield RadioButton(
                     "Filter Active",
@@ -425,8 +420,7 @@ class LoggerApp(App):
                     tooltip="(c) Toggle case sensitivity/insensitivity",
                 )
 
-                yield Spacer()
-                yield Label("Filter Mode")
+                yield Title("Filter Mode", variant="h2")
 
                 with RadioSet(classes="settings-radio-button"):
                     yield RadioButton(
@@ -443,10 +437,7 @@ class LoggerApp(App):
                         tooltip="(l) Highlight matching logs",  # TODO: maybe automate the keybinds tooltip?
                     )
 
-                yield Spacer()
-                with Center():
-                    yield Label("Display Settings", classes="title")
-                yield Rule()
+                yield Title("Display", variant="h1")
 
                 yield RadioButton(
                     "Autoscroll",

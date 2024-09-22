@@ -14,10 +14,6 @@ App {
     layer: below;
 }
 
-.title {
-    text-style: bold;
-    color: $secondary
-}
 
 .settings-radio-button {
     width: 100%;
