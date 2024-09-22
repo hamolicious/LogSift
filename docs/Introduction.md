@@ -43,9 +43,14 @@ Supalogger provides several settings to refine how the filter is applied:
 #### 3. Case Insensitivity
 - Toggles case sensitivity. When enabled, the filter ignores the case of terms (e.g., "Error" will match "error").
 
+## Display Settings
+
+### Word Wrap
+- Toggles word-wrapping logs
+
 ---
 
-## Filtering Modes
+### Filtering Modes
 Supalogger offers two main filtering modes for logs:
 
 #### 1. Omit Mode
@@ -69,6 +74,7 @@ Supalogger offers two main filtering modes for logs:
 | `o`              | Omits non-matching logs.                                                    |
 | `l`              | Highlights matching logs.                                                   |
 | `b`              | Toggles visibility of the settings panel.                                   |
+| `w`              | Toggle word-wrapping logs.                                                   |
 | `shift+h`        | Toggles the documentation panel visibility.                                 |
 | `k` / `up`       | Scrolls the logger up.                                                      |
 | `shift+k`        | Scrolls the logger up 10 lines.                                             |

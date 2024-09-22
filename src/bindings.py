@@ -77,4 +77,9 @@ BINDINGS: tuple[Binding, ...] = (
         action="copy_shown",
         description="Copy filtered logs to clipboard",
     ),
+    Binding(
+        "w",
+        action=f"toggle_setting('#{Ids.WORD_WRAP_TOGGLE}')",
+        description="Toggle word-wrapping logs",
+    ),
 )

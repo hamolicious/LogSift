@@ -164,6 +164,15 @@ class LoggerApp(App):
         for log in self.get_logs()[-self.MAX_DISPLAY_LOGS : :]:
             self.add_to_logger(str(log))
 
+    async def update_word_wrap(self) -> None:
+        logger = self.query_one(f"#{Ids.LOGGER}", RichLog)
+        setting = self.query_one(f"#{Ids.WORD_WRAP_TOGGLE}", RadioButton)
+
+        logger.wrap = setting.value
+
+        await logger.recompose()
+        self.refresh_logger(clear=True)
+
     # Filtering
 
     @work(thread=True, exclusive=True)
@@ -259,7 +268,7 @@ class LoggerApp(App):
 
     @on(RadioButton.Changed)
     @on(RadioSet.Changed)
-    def on_radio_button_changed(
+    async def on_radio_button_changed(
         self, event: RadioButton.Changed | RadioSet.Changed
     ) -> None:
         id_: str | None
@@ -297,6 +306,9 @@ class LoggerApp(App):
             case Ids.MATCH_ALL:
                 self.filter_manager.set_match_all(value)
 
+            case Ids.WORD_WRAP_TOGGLE:
+                await self.update_word_wrap()
+
             case _:
                 raise ValueError(f"No case for {id_}")
 
@@ -325,7 +337,7 @@ class LoggerApp(App):
                 yield RichLog(
                     highlight=True,  # TODO: use this for highlighting
                     markup=True,
-                    wrap=False,  # TODO: build toggle for this
+                    wrap=False,
                     max_lines=self.MAX_DISPLAY_LOGS,
                     id=Ids.LOGGER,
                     auto_scroll=True,  # TODO: need to build toggle for this
@@ -369,7 +381,7 @@ class LoggerApp(App):
                 yield Label("Ingestion Settings")  # TODO: sort out naming of shit
 
                 yield RadioButton(
-                    "Pause ingesting logs",
+                    "Pause Ingesting Logs",
                     value=False,
                     id=Ids.PAUSE_INGESTING_LOGS_TOGGLE,
                     classes="settings-radio-button",
@@ -394,7 +406,7 @@ class LoggerApp(App):
                     tooltip="(m) Matches either all or at least 1 term from filter",
                 )
                 yield RadioButton(
-                    "Case insensitive",
+                    "Case Insensitive",
                     value=True,
                     id=Ids.CASE_INSENSITIVE_TOGGLE,
                     classes="settings-radio-button",
@@ -418,6 +430,19 @@ class LoggerApp(App):
                         classes="full-width",
                         tooltip="(l) Highlight matching logs",  # TODO: maybe automate the keybinds tooltip?
                     )
+
+                yield Spacer()
+                with Center():
+                    yield Label("Display Settings", classes="title")
+                yield Rule()
+
+                yield RadioButton(
+                    "Word Wrap",
+                    value=False,
+                    id=Ids.WORD_WRAP_TOGGLE,
+                    classes="settings-radio-button",
+                    tooltip="(w) Toggle word-wrapping logs",
+                )
 
             yield Documentation(id=Ids.DOCUMENTATION_CONTAINER, classes="hidden")
 
