@@ -24,7 +24,7 @@ class Documentation(Static):
         super().__init__(id=id, classes=classes)
 
     def load_docs(self) -> str:
-        with open("logsift/docs/docs.md", "r") as f:
+        with open("./../docs/docs.md", "r") as f:
             return f.read()
 
     def compose(self) -> ComposeResult:
