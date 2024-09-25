@@ -6,5 +6,4 @@ build:
 	@python -m build
 
 clean:
-	@make build
 	@-pip uninstall logsift
