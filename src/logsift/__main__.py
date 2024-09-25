@@ -20,20 +20,20 @@ import multiprocessing
 import tempfile
 
 
-from src.components.title import Title
-from src.log_collection import LogManager
-from src.components.documentation import Documentation
-from src.log import Log
-from src.filtering import FilterManager
-from src.types.ids import Ids
-from src.args import get_args
-from src.bindings import BINDINGS as DEFAULT_BINDINGS
+from logsift.components.title import Title
+from logsift.log_collection import LogManager
+from logsift.components.documentation import Documentation
+from logsift.log import Log
+from logsift.filtering import FilterManager
+from logsift.types.ids import Ids
+from logsift.args import get_args
+from logsift.bindings import BINDINGS as DEFAULT_BINDINGS
 
 
 class LoggerApp(App):
     """Logging tool"""
 
-    CSS_PATH = "src/css/app.tcss"
+    CSS_PATH = "css/app.tcss"
     BINDINGS = list(DEFAULT_BINDINGS)  # to make mypy happy :/
 
     command = get_args()

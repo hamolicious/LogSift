@@ -2,7 +2,7 @@ from collections.abc import Callable
 import multiprocessing
 import multiprocessing.connection
 import subprocess
-from .log import Log
+from logsift.log import Log
 from multiprocessing.connection import Connection
 import threading
 

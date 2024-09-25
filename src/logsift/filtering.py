@@ -1,4 +1,4 @@
-from .term_decoder import TermDecoder
+from logsift.term_decoder import TermDecoder
 
 
 class FilterManager:

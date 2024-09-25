@@ -1,5 +1,5 @@
 from textual.binding import Binding
-from src.types.ids import Ids
+from logsift.types.ids import Ids
 
 BINDINGS: tuple[Binding, ...] = (
     Binding(

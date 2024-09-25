@@ -17,5 +17,8 @@
         "statusBarItem.remoteForeground": "#e7e7e7",
         "tab.activeBorder": "#df1376"
     },
-    "peacock.color": "#b00f5d"
+    "peacock.color": "#b00f5d",
+    "cSpell.words": [
+        "logsift"
+    ]
 }

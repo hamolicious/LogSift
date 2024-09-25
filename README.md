@@ -1,22 +1,21 @@
-# Supalogger
+# LogSift
 Quickly filter your logs from any command.
 
 ## Usage
-Info below assumes you have added an alias for the logger, otherwise, replace `logger` with `python -m logger`.
+The below assumes you have added an alias (DOSKEY for windows) for LogSift, otherwise, replace references to `logsift` with `python -m logsift`.
 
 ```bash
-logger npm run somecommand
-logger cat /var/log/syslog
+logsift npm run somecommand
+logsift cat /var/log/syslog
 ```
 
 ## Documentation
-The documentation is available within the logger itself, simply run `logger` and then hit `shift+h` to read the docs.
+The documentation is available over in [/src/docs/docs.md](docs.md) or within LogSift itself, simply run `logsift` and then hit `shift+h` to read the docs.
 
 ## Installation
-Installation has not been productionised yet. Coming soon!
-<!-- ```bash
-pip install hlogger
-``` -->
+```bash
+pip install logsift
+```
 
 ## Cross compatibility
 ### Linux
