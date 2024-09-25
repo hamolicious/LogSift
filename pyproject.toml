@@ -1,6 +1,6 @@
 [project]
 name = "logsift"
-version = "1.0.0"
+version = "1.0.1"
 authors = [{ name = "hamolicious", email = "hamolicious@hamolicious.net" }]
 description = "Quickly filter your logs from any command"
 readme = "README.md"
@@ -39,9 +39,9 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 
-# [project.urls]
-# Homepage = ""
-# Issues = ""
+[project.urls]
+Homepage = "https://github.com/hamolicious/LogSift"
+Issues = "https://github.com/hamolicious/LogSift/issues"
 
 [build-system]
 requires = ["hatchling"]
