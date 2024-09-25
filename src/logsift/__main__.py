@@ -60,6 +60,15 @@ class LoggerApp(App):
         self.logs_manager = LogManager(command, self.ingest_log)
         self.logs_manager.run()
 
+    # Docs
+
+    def get_docs_path(self) -> str:
+        return "/".join([*__file__.split("/")[:-1:], "docs/docs.md"])
+
+    def load_docs(self) -> str:
+        with open(self.get_docs_path()) as f:
+            return f.read()
+
     # Logs
 
     def get_logs(self) -> list[Log]:
@@ -447,7 +456,9 @@ class LoggerApp(App):
                     tooltip="(w) Toggle word-wrapping logs",
                 )
 
-            yield Documentation(id=Ids.DOCUMENTATION_CONTAINER, classes="hidden")
+            yield Documentation(
+                self.load_docs(), id=Ids.DOCUMENTATION_CONTAINER, classes="hidden"
+            )
 
 
 if __name__ == "__main__":
