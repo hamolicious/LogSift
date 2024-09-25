@@ -1,6 +1,6 @@
 [project]
 name = "logsift"
-version = "1.0.1"
+version = "1.0.2"
 authors = [{ name = "hamolicious", email = "hamolicious@hamolicious.net" }]
 description = "Quickly filter your logs from any command"
 readme = "README.md"
