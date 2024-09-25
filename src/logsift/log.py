@@ -31,6 +31,7 @@ class Log:
 
     @property
     def time(self) -> float:
+        # currently not used
         return self._ingest_time
 
     @property

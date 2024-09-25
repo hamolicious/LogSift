@@ -348,7 +348,7 @@ class LoggerApp(App):
             with Vertical(id="logger-container"):
                 # TODO: add pagination
                 yield RichLog(
-                    highlight=True,  # TODO: use this for highlighting
+                    highlight=True,
                     markup=True,
                     wrap=False,
                     max_lines=self.MAX_DISPLAY_LOGS,
