@@ -6,7 +6,7 @@ The below assumes you have added an alias (DOSKEY for windows) for LogSift, othe
 
 ```bash
 logsift npm run somecommand
-logsift cat /var/log/syslog
+logsift tail -f /var/log/syslog
 ```
 
 ## Documentation
@@ -18,6 +18,9 @@ pip install logsift
 ```
 
 ## Cross compatibility
+### MacOS
+* Uses the built in `pbcopy` command
+
 ### Linux
 * Assumes that you have `xclip` installed and configured to implement copy behaviour. (maybe replace with a library?)
 
