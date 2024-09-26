@@ -10,7 +10,7 @@ logsift cat /var/log/syslog
 ```
 
 ## Documentation
-The documentation is available over in [/src/docs/docs.md](docs.md) or within LogSift itself, simply run `logsift` and then hit `shift+h` to read the docs.
+The documentation is available over in docs.md (/src/logsift/docs/docs.md) or within LogSift itself, simply run `logsift` and then hit `shift+h` to read the docs.
 
 ## Installation
 ```bash
