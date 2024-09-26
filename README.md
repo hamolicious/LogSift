@@ -1,3 +1,7 @@
+![GitHub Repo stars](https://img.shields.io/github/stars/hamolicious/LogSift?style=flat-square&label=Github%20Stars)
+[![PyPI - Version](https://img.shields.io/pypi/v/logsift?style=flat-square)](https://pypi.org/project/logsift/)
+
+
 # LogSift
 Quickly filter your logs from any command.
 
