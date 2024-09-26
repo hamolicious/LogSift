@@ -21,6 +21,10 @@ The documentation is available over in docs.md (/src/logsift/docs/docs.md) or wi
 pip install logsift
 ```
 
+## Known Bugs
+I am still looking into these bugs and hoping to get them fixed asap.
+* `npm run` can sometimes hang on second run. Running something like `killall node` after exiting LogSift works as a temporary workaround.
+
 ## Cross compatibility
 ### MacOS
 * Uses the built in `pbcopy` command
