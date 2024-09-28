@@ -1,5 +1,6 @@
 variables:
   INTERNAL: "false"
+  GITHUB_MIRROR_URL: "/hamolicious/LogSift.git"
 
 include:
   - project: "gitlab/default-pipelines"
@@ -10,3 +11,4 @@ include:
 mirror_to_github:
   needs:
     - publish
+  when: on_success
